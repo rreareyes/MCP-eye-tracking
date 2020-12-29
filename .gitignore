@@ -40,4 +40,4 @@ vignettes/*.pdf
 
 # Folders with large files
 Analysis/Data
-Results/Fits
+Analysis/Results/Fits
