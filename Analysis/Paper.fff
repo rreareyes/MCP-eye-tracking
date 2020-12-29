@@ -1,0 +1,105 @@
+\begin{figure*}[hbt]
+\ifnextchar[{\eatarg}{}
+
+\centering
+\includegraphics{C:/Users/rerr_/Google Drive/Graduate/Lab/Studies/MultiCue_Probabilistic/Stages/Shifted Weights/Eye Tracking/Analysis/Figures/Z_stimulus.png}
+\caption{\label{fig:stimulus}Sample stimulus presented to participants.}
+\end{figure*}
+\begin{figure*}[hbt]
+\ifnextchar[{\eatarg}{}
+
+\centering
+\includegraphics{C:/Users/rerr_/Google Drive/Graduate/Lab/Studies/MultiCue_Probabilistic/Stages/Shifted Weights/Eye Tracking/Analysis/Figures/Z_weights_normal.png}
+\caption{\label{fig:weights}Example of the organization of cue weights across domains during training and T1. All the equipment (domains) and brands (states) kept their position constant across subjects, but the allocation of weights was assigned semirandomly across them.}
+\end{figure*}
+\begin{figure*}[hbt]
+\ifnextchar[{\eatarg}{}
+
+\centering
+\includegraphics{C:/Users/rerr_/Google Drive/Graduate/Lab/Studies/MultiCue_Probabilistic/Stages/Shifted Weights/Eye Tracking/Analysis/Figures/Z_weights_equal.png}
+\caption{\label{fig:weights-equal}Example of the organization of cue weights across domains during T2 in 0. All the different pairs had the same contingencies, preserving winning states.}
+\end{figure*}
+\begin{figure*}[hbt]
+\ifnextchar[{\eatarg}{}
+
+\centering
+\includegraphics{C:/Users/rerr_/Google Drive/Graduate/Lab/Studies/MultiCue_Probabilistic/Stages/Shifted Weights/Eye Tracking/Analysis/Figures/Z_weights_inverted.png}
+\caption{\label{fig:weights-inverted}Example of the organization of cue weights across domains during T2 in 1. The different domains show now inverted contingencies, preserving winning states.}
+\end{figure*}
+\begin{figure*}[hbt]
+\ifnextchar[{\eatarg}{}
+
+\centering
+\includegraphics{C:/Users/rerr_/Google Drive/Graduate/Lab/Studies/MultiCue_Probabilistic/Stages/Shifted Weights/Eye Tracking/Analysis/Figures/Z_decision_models.png}
+\caption{\label{fig:decision-models}Information usage in the different decision models. In models 1-15, black circles indicate the domain(s) used by each strategy. For models 16-18 we created a model that integrated the domains in a single piece of information (i.e.~a sum of positive traits). Models 19-21 consider a Serial Search for information, starting in the most informative domain, continuing in descending order of importance, and stoping as soon as any of these domains discriminates between cues.}
+\end{figure*}
+\begin{figure*}[hbt]
+\ifnextchar[{\eatarg}{}
+
+\centering
+\includegraphics{C:/Users/rerr_/Google Drive/Graduate/Lab/Studies/MultiCue_Probabilistic/Stages/Shifted Weights/Eye Tracking/Analysis/Figures/Z_scenarios.png}
+\caption{\label{fig:scenarios}Decision scenarios according to the best discriminating domain between cues.}
+\end{figure*}
+\begin{figure*}[hbt]
+\ifnextchar[{\eatarg}{}
+
+\centering
+\includegraphics{C:/Users/rerr_/Google Drive/Graduate/Lab/Studies/MultiCue_Probabilistic/Stages/Shifted Weights/Eye Tracking/Analysis/Figures/A1_model_histogram.png}
+\caption{\label{fig:classification}Strategy group classification based on the variational Bayesian inference.}
+\end{figure*}
+\begin{figure*}[hbt]
+\ifnextchar[{\eatarg}{}
+
+\centering
+\includegraphics{C:/Users/rerr_/Google Drive/Graduate/Lab/Studies/MultiCue_Probabilistic/Stages/Shifted Weights/Eye Tracking/Analysis/Figures/A2_model_histogram.png}
+\caption{\label{fig:classification-reduced}Decision groups studied in detail for this work.}
+\end{figure*}
+\begin{figure*}[hbt]
+\ifnextchar[{\eatarg}{}
+
+\centering
+\includegraphics{C:/Users/rerr_/Google Drive/Graduate/Lab/Studies/MultiCue_Probabilistic/Stages/Shifted Weights/Eye Tracking/Analysis/Figures/B1_performance.png}
+\caption{\label{fig:performance}Performance (as percent of accurate trials) across testing phases. Individual dots correspond to the median from the posterior draws from each participant. Error bars represent standard deviations.}
+\end{figure*}
+\begin{figure*}[hbt]
+\ifnextchar[{\eatarg}{}
+
+\centering
+\includegraphics{C:/Users/rerr_/Google Drive/Graduate/Lab/Studies/MultiCue_Probabilistic/Stages/Shifted Weights/Eye Tracking/Analysis/Figures/C1_first.png}
+\caption{\label{fig:first}Allocation of first fixations across domains in T1. Individual dots correspond to the median from the posterior draws from each participant. Error bars represent standard deviations.}
+\end{figure*}
+\begin{figure*}[hbt]
+\ifnextchar[{\eatarg}{}
+
+\centering
+\includegraphics{C:/Users/rerr_/Google Drive/Graduate/Lab/Studies/MultiCue_Probabilistic/Stages/Shifted Weights/Eye Tracking/Analysis/Figures/C2_first_scenario.png}
+\caption{\label{fig:first-scenario}Allocation of first fixations across domains in the different decision scenarios in T1. Individual dots correspond to the median from the posterior draws from each participant. Error bars represent standard deviations.}
+\end{figure*}
+\begin{figure*}[hbt]
+\ifnextchar[{\eatarg}{}
+
+\centering
+\includegraphics{C:/Users/rerr_/Google Drive/Graduate/Lab/Studies/MultiCue_Probabilistic/Stages/Shifted Weights/Eye Tracking/Analysis/Figures/D1_proportion.png}
+\caption{\label{fig:proportion}Allocation of fixations across domains in T1 for the different decision groups. Individual dots correspond to the median from the posterior draws from each participant. Error bars represent standard deviations.}
+\end{figure*}
+\begin{figure*}[hbt]
+\ifnextchar[{\eatarg}{}
+
+\centering
+\includegraphics{C:/Users/rerr_/Google Drive/Graduate/Lab/Studies/MultiCue_Probabilistic/Stages/Shifted Weights/Eye Tracking/Analysis/Figures/D2_proportion_scenario.png}
+\caption{\label{fig:proportion-scenario}Allocation of fixations across domains in T1 for the different decision groups. Individual dots correspond to the median from the posterior draws from each participant. Error bars represent standard deviations.}
+\end{figure*}
+\begin{figure*}[hbt]
+\ifnextchar[{\eatarg}{}
+
+\centering
+\includegraphics{C:/Users/rerr_/Google Drive/Graduate/Lab/Studies/MultiCue_Probabilistic/Stages/Shifted Weights/Eye Tracking/Analysis/Figures/E1_last.png}
+\caption{\label{fig:last}Allocation of the last fixations across domains in T1. Individual dots correspond to the median from the posterior draws from each participant. Error bars represent standard deviations.}
+\end{figure*}
+\begin{figure*}[hbt]
+\ifnextchar[{\eatarg}{}
+
+\centering
+\includegraphics{C:/Users/rerr_/Google Drive/Graduate/Lab/Studies/MultiCue_Probabilistic/Stages/Shifted Weights/Eye Tracking/Analysis/Figures/E2_last_scenario.png}
+\caption{\label{fig:last-scenario}Allocation of last fixations across domains in the different decision scenarios in T1. Individual dots correspond to the median from the posterior draws from each participant. Error bars represent standard deviations.}
+\end{figure*}

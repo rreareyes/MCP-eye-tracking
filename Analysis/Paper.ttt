@@ -1,0 +1,404 @@
+\begin{ThreePartTable}
+
+\begin{longtable}{llllll}\noalign{\getlongtablewidth\global\LTcapwidth=\longtablewidth}
+\caption{\label{tab:table-performance-change}Accuracy between phases across groups}\\
+\toprule
+experiment & \multicolumn{1}{c}{strategy} & \multicolumn{1}{c}{ROPE\_Percentage} & \multicolumn{1}{c}{rawdirection} & \multicolumn{1}{c}{p\_HDI} & \multicolumn{1}{c}{p\_direction}\\
+\midrule
+\endfirsthead
+\caption*{\normalfont{Table \ref{tab:table-performance-change} continued}}\\
+\toprule
+experiment & \multicolumn{1}{c}{strategy} & \multicolumn{1}{c}{ROPE\_Percentage} & \multicolumn{1}{c}{rawdirection} & \multicolumn{1}{c}{p\_HDI} & \multicolumn{1}{c}{p\_direction}\\
+\midrule
+\endhead
+0 & 1st only & 0.35 & 0.99 & 35.30\% & = 0.987\\
+0 & 2nd only & 0.83 & 0.68 & 82.80\% & = 0.681\\
+0 & Partial Tallying & 0.02 & 1.00 & 2.10\% & > 0.999\\
+0 & Serial Search & 0.02 & 1.00 & 1.60\% & = 0.997\\
+0 & Tallying & 0.50 & 0.79 & 49.60\% & = 0.789\\
+1 & 1st only & 0.00 & 1.00 & 0.00\% & > 0.999\\
+1 & 2nd only & 0.33 & 0.94 & 33.00\% & = 0.936\\
+1 & Partial Tallying & 0.00 & 1.00 & 0.00\% & > 0.999\\
+1 & Serial Search & 0.00 & 1.00 & 0.00\% & > 0.999\\
+1 & Tallying & 0.74 & 0.65 & 73.80\% & = 0.652\\
+\bottomrule
+\end{longtable}
+
+\end{ThreePartTable}
+\efloatseparator
+ 
+\begin{ThreePartTable}
+
+\begin{longtable}{llllll}\noalign{\getlongtablewidth\global\LTcapwidth=\longtablewidth}
+\caption{\label{tab:table-performance-group-diff}Paired comparisons between groups on the difference in performance across phases}\\
+\toprule
+experiment & \multicolumn{1}{c}{comparison} & \multicolumn{1}{c}{ROPE\_Percentage} & \multicolumn{1}{c}{rawdirection} & \multicolumn{1}{c}{p\_HDI} & \multicolumn{1}{c}{p\_direction}\\
+\midrule
+\endfirsthead
+\caption*{\normalfont{Table \ref{tab:table-performance-group-diff} continued}}\\
+\toprule
+experiment & \multicolumn{1}{c}{comparison} & \multicolumn{1}{c}{ROPE\_Percentage} & \multicolumn{1}{c}{rawdirection} & \multicolumn{1}{c}{p\_HDI} & \multicolumn{1}{c}{p\_direction}\\
+\midrule
+\endhead
+0 & first\_lazy & 0.74 & 0.82 & 74.2\% & = 0.824\\
+0 & first\_second & 0.24 & 0.96 & 24.2\% & = 0.958\\
+0 & first\_serial & 0.47 & 0.87 & 46.9\% & = 0.874\\
+0 & first\_tally & 0.17 & 0.95 & 16.7\% & = 0.954\\
+0 & second\_lazy & 0.06 & 0.99 & 5.8\% & = 0.989\\
+0 & second\_serial & 0.04 & 0.98 & 3.6\% & = 0.985\\
+0 & second\_tally & 0.60 & 0.69 & 59.7\% & = 0.688\\
+0 & serial\_lazy & 0.75 & 0.69 & 75.4\% & = 0.689\\
+0 & serial\_tally & 0.02 & 0.98 & 2.4\% & = 0.984\\
+0 & tally\_lazy & 0.04 & 0.98 & 3.6\% & = 0.983\\
+1 & first\_lazy & 0.88 & 0.66 & 87.9\% & = 0.664\\
+1 & first\_second & 0.36 & 0.89 & 36.5\% & = 0.89\\
+1 & first\_serial & 0.40 & 0.86 & 39.9\% & = 0.862\\
+1 & first\_tally & 0.00 & 1.00 & 0.0\% & = 0.997\\
+1 & second\_lazy & 0.26 & 0.92 & 25.6\% & = 0.922\\
+1 & second\_serial & 0.08 & 0.96 & 8.5\% & = 0.96\\
+1 & second\_tally & 0.28 & 0.91 & 27.5\% & = 0.913\\
+1 & serial\_lazy & 0.54 & 0.80 & 53.5\% & = 0.796\\
+1 & serial\_tally & 0.00 & 1.00 & 0.0\% & = 0.998\\
+1 & tally\_lazy & 0.00 & 1.00 & 0.0\% & = 0.998\\
+\bottomrule
+\end{longtable}
+
+\end{ThreePartTable}
+\efloatseparator
+ 
+\begin{ThreePartTable}
+
+\begin{longtable}{lllll}\noalign{\getlongtablewidth\global\LTcapwidth=\longtablewidth}
+\caption{\label{tab:table-performance-T1}Paired comparisons between groups on the performance in T1}\\
+\toprule
+comparison & \multicolumn{1}{c}{ROPE\_Percentage} & \multicolumn{1}{c}{rawdirection} & \multicolumn{1}{c}{p\_HDI} & \multicolumn{1}{c}{p\_direction}\\
+\midrule
+\endfirsthead
+\caption*{\normalfont{Table \ref{tab:table-performance-T1} continued}}\\
+\toprule
+comparison & \multicolumn{1}{c}{ROPE\_Percentage} & \multicolumn{1}{c}{rawdirection} & \multicolumn{1}{c}{p\_HDI} & \multicolumn{1}{c}{p\_direction}\\
+\midrule
+\endhead
+first\_lazy & 0.82 & 0.74 & 81.60\% & = 0.739\\
+first\_second & 0.65 & 0.72 & 65.20\% & = 0.715\\
+first\_serial & 0.07 & 0.98 & 6.60\% & = 0.981\\
+first\_tally & 0.00 & 0.98 & 0.30\% & = 0.983\\
+second\_lazy & 0.74 & 0.56 & 73.50\% & = 0.556\\
+second\_serial & 0.30 & 0.88 & 29.90\% & = 0.883\\
+second\_tally & 0.15 & 0.93 & 15.40\% & = 0.927\\
+serial\_lazy & 0.19 & 0.95 & 18.90\% & = 0.952\\
+serial\_tally & 0.52 & 0.67 & 52.10\% & = 0.668\\
+tally\_lazy & 0.07 & 0.96 & 7.00\% & = 0.962\\
+\bottomrule
+\end{longtable}
+
+\end{ThreePartTable}
+\efloatseparator
+ 
+\begin{ThreePartTable}
+
+\begin{longtable}{llllll}\noalign{\getlongtablewidth\global\LTcapwidth=\longtablewidth}
+\caption{\label{tab:table-first}Follow up comparisons for the proportion of first fixations across decision scenarios.}\\
+\toprule
+strategy & \multicolumn{1}{c}{comparison} & \multicolumn{1}{c}{ROPE\_Percentage} & \multicolumn{1}{c}{rawdirection} & \multicolumn{1}{c}{p\_HDI} & \multicolumn{1}{c}{p\_direction}\\
+\midrule
+\endfirsthead
+\caption*{\normalfont{Table \ref{tab:table-first} continued}}\\
+\toprule
+strategy & \multicolumn{1}{c}{comparison} & \multicolumn{1}{c}{ROPE\_Percentage} & \multicolumn{1}{c}{rawdirection} & \multicolumn{1}{c}{p\_HDI} & \multicolumn{1}{c}{p\_direction}\\
+\midrule
+\endhead
+1st only & d1\_all & 0.00 & 1.00 & 0.00\% & > 0.999\\
+2nd only & d2\_all & 0.00 & 1.00 & 0.00\% & = 0.995\\
+Partial Tallying & d1\_2 & 0.08 & 0.94 & 8.20\% & = 0.945\\
+Partial Tallying & d12\_34 & 0.09 & 0.95 & 9.10\% & = 0.95\\
+Partial Tallying & d3\_4 & 0.34 & 0.65 & 33.70\% & = 0.653\\
+Serial Search & d1\_all & 0.00 & 1.00 & 0.00\% & > 0.999\\
+Tallying & d1\_2 & 0.09 & 0.89 & 9.30\% & = 0.894\\
+Tallying & d1\_3 & 0.04 & 0.94 & 3.90\% & = 0.944\\
+Tallying & d1\_4 & 0.04 & 0.94 & 3.90\% & = 0.936\\
+Tallying & d2\_3 & 0.26 & 0.70 & 25.50\% & = 0.696\\
+Tallying & d2\_4 & 0.22 & 0.70 & 21.80\% & = 0.695\\
+Tallying & d3\_4 & 0.27 & 0.53 & 26.70\% & = 0.533\\
+\bottomrule
+\end{longtable}
+
+\end{ThreePartTable}
+\efloatseparator
+ 
+\begin{ThreePartTable}
+
+\begin{longtable}{lllllll}\noalign{\getlongtablewidth\global\LTcapwidth=\longtablewidth}
+\caption{\label{tab:table-first-scenario}Follow up comparisons for the proportion of first fixations.}\\
+\toprule
+strategy & \multicolumn{1}{c}{scenario} & \multicolumn{1}{c}{comparison} & \multicolumn{1}{c}{ROPE\_Percentage} & \multicolumn{1}{c}{rawdirection} & \multicolumn{1}{c}{p\_HDI} & \multicolumn{1}{c}{p\_direction}\\
+\midrule
+\endfirsthead
+\caption*{\normalfont{Table \ref{tab:table-first-scenario} continued}}\\
+\toprule
+strategy & \multicolumn{1}{c}{scenario} & \multicolumn{1}{c}{comparison} & \multicolumn{1}{c}{ROPE\_Percentage} & \multicolumn{1}{c}{rawdirection} & \multicolumn{1}{c}{p\_HDI} & \multicolumn{1}{c}{p\_direction}\\
+\midrule
+\endhead
+1st only & 0 & d1\_all & 0.00 & 1.00 & 0.000\% & > 0.999\\
+1st only & 1 & d1\_all & 0.00 & 1.00 & 0.000\% & > 0.999\\
+1st only & 2 & d1\_all & 0.00 & 1.00 & 0.000\% & > 0.999\\
+1st only & 3 & d1\_all & 0.00 & 1.00 & 0.000\% & > 0.999\\
+2nd only & 0 & d2\_all & 0.00 & 1.00 & 0.000\% & = 0.996\\
+2nd only & 1 & d2\_all & 0.00 & 1.00 & 0.000\% & = 0.995\\
+2nd only & 2 & d2\_all & 0.00 & 1.00 & 0.000\% & = 0.997\\
+2nd only & 3 & d2\_all & 0.07 & 0.93 & 7.000\% & = 0.932\\
+Partial Tallying & 0 & d1\_2 & 0.03 & 0.96 & 3.200\% & = 0.965\\
+Partial Tallying & 0 & d12\_34 & 0.07 & 0.96 & 7.200\% & = 0.959\\
+Partial Tallying & 0 & d3\_4 & 0.33 & 0.68 & 33.200\% & = 0.675\\
+Partial Tallying & 1 & d1\_2 & 0.04 & 0.96 & 3.700\% & = 0.965\\
+Partial Tallying & 1 & d12\_34 & 0.03 & 0.97 & 3.000\% & = 0.973\\
+Partial Tallying & 1 & d3\_4 & 0.33 & 0.66 & 32.800\% & = 0.665\\
+Partial Tallying & 2 & d1\_2 & 0.16 & 0.90 & 16.200\% & = 0.897\\
+Partial Tallying & 2 & d12\_34 & 0.29 & 0.83 & 29.100\% & = 0.831\\
+Partial Tallying & 2 & d3\_4 & 0.23 & 0.80 & 23.300\% & = 0.801\\
+Partial Tallying & 3 & d1\_2 & 0.18 & 0.83 & 18.200\% & = 0.834\\
+Partial Tallying & 3 & d12\_34 & 0.36 & 0.63 & 36.400\% & = 0.633\\
+Partial Tallying & 3 & d3\_4 & 0.23 & 0.74 & 22.800\% & = 0.745\\
+Serial Search & 0 & d1\_all & 0.00 & 1.00 & 0.000\% & > 0.999\\
+Serial Search & 1 & d1\_all & 0.00 & 1.00 & 0.000\% & > 0.999\\
+Serial Search & 2 & d1\_all & 0.00 & 1.00 & 0.000\% & > 0.999\\
+Serial Search & 3 & d1\_all & 0.00 & 1.00 & 0.000\% & > 0.999\\
+Tallying & 0 & d1\_2 & 0.09 & 0.89 & 9.400\% & = 0.89\\
+Tallying & 0 & d1\_3 & 0.04 & 0.94 & 4.500\% & = 0.941\\
+Tallying & 0 & d1\_4 & 0.03 & 0.94 & 2.900\% & = 0.941\\
+Tallying & 0 & d2\_3 & 0.25 & 0.70 & 24.800\% & = 0.698\\
+Tallying & 0 & d2\_4 & 0.20 & 0.72 & 20.100\% & = 0.725\\
+Tallying & 0 & d3\_4 & 0.25 & 0.57 & 25.300\% & = 0.568\\
+Tallying & 1 & d1\_2 & 0.16 & 0.74 & 15.700\% & = 0.737\\
+Tallying & 1 & d1\_3 & 0.08 & 0.91 & 8.100\% & = 0.909\\
+Tallying & 1 & d1\_4 & 0.10 & 0.86 & 9.900\% & = 0.86\\
+Tallying & 1 & d2\_3 & 0.18 & 0.82 & 17.800\% & = 0.815\\
+Tallying & 1 & d2\_4 & 0.19 & 0.73 & 18.600\% & = 0.733\\
+Tallying & 1 & d3\_4 & 0.24 & 0.56 & 24.100\% & = 0.563\\
+Tallying & 2 & d1\_2 & 0.11 & 0.85 & 11.100\% & = 0.847\\
+Tallying & 2 & d1\_3 & 0.10 & 0.88 & 9.800\% & = 0.875\\
+Tallying & 2 & d1\_4 & 0.07 & 0.90 & 7.400\% & = 0.898\\
+Tallying & 2 & d2\_3 & 0.25 & 0.57 & 24.700\% & = 0.569\\
+Tallying & 2 & d2\_4 & 0.20 & 0.67 & 20.100\% & = 0.669\\
+Tallying & 2 & d3\_4 & 0.22 & 0.61 & 21.900\% & = 0.613\\
+Tallying & 3 & d1\_2 & 0.06 & 0.93 & 5.900\% & = 0.928\\
+Tallying & 3 & d1\_3 & 0.05 & 0.94 & 5.200\% & = 0.939\\
+Tallying & 3 & d1\_4 & 0.11 & 0.79 & 10.800\% & = 0.793\\
+Tallying & 3 & d2\_3 & 0.22 & 0.52 & 21.600\% & = 0.523\\
+Tallying & 3 & d2\_4 & 0.16 & 0.73 & 16.000\% & = 0.731\\
+Tallying & 3 & d3\_4 & 0.16 & 0.76 & 15.700\% & = 0.762\\
+\bottomrule
+\end{longtable}
+
+\end{ThreePartTable}
+\efloatseparator
+ 
+\begin{ThreePartTable}
+
+\begin{longtable}{llllll}\noalign{\getlongtablewidth\global\LTcapwidth=\longtablewidth}
+\caption{\label{tab:table-proportion}Follow up comparisons for the proportion of fixations.}\\
+\toprule
+strategy & \multicolumn{1}{c}{comparison} & \multicolumn{1}{c}{ROPE\_Percentage} & \multicolumn{1}{c}{rawdirection} & \multicolumn{1}{c}{p\_HDI} & \multicolumn{1}{c}{p\_direction}\\
+\midrule
+\endfirsthead
+\caption*{\normalfont{Table \ref{tab:table-proportion} continued}}\\
+\toprule
+strategy & \multicolumn{1}{c}{comparison} & \multicolumn{1}{c}{ROPE\_Percentage} & \multicolumn{1}{c}{rawdirection} & \multicolumn{1}{c}{p\_HDI} & \multicolumn{1}{c}{p\_direction}\\
+\midrule
+\endhead
+1st only & d1\_all & 0.00 & 1.00 & 0.00\% & > 0.999\\
+2nd only & d2\_all & 0.00 & 1.00 & 0.00\% & > 0.999\\
+Partial Tallying & d1\_2 & 0.68 & 0.70 & 67.90\% & = 0.703\\
+Partial Tallying & d12\_34 & 0.00 & 1.00 & 0.00\% & = 0.999\\
+Partial Tallying & d3\_4 & 0.65 & 0.69 & 64.60\% & = 0.69\\
+Serial Search & d1\_2 & 0.00 & 0.99 & 0.00\% & = 0.988\\
+Serial Search & d2\_3 & 0.00 & 0.99 & 0.00\% & = 0.994\\
+Serial Search & d3\_4 & 0.52 & 0.53 & 52.50\% & = 0.531\\
+Serial Search & lin1 & 0.27 & 0.56 & 26.70\% & = 0.562\\
+Serial Search & lin2 & 0.13 & 0.91 & 13.20\% & = 0.909\\
+Serial Search & lin3 & 0.14 & 0.72 & 14.10\% & = 0.72\\
+Tallying & d1\_2 & 0.12 & 0.93 & 12.00\% & = 0.933\\
+Tallying & d1\_3 & 0.05 & 0.96 & 4.80\% & = 0.957\\
+Tallying & d1\_4 & 0.01 & 0.98 & 1.30\% & = 0.977\\
+Tallying & d2\_3 & 0.38 & 0.70 & 37.60\% & = 0.698\\
+Tallying & d2\_4 & 0.37 & 0.76 & 37.20\% & = 0.757\\
+Tallying & d3\_4 & 0.50 & 0.56 & 49.50\% & = 0.562\\
+\bottomrule
+\end{longtable}
+
+\end{ThreePartTable}
+\efloatseparator
+ 
+\begin{ThreePartTable}
+
+\begin{longtable}{lllllll}\noalign{\getlongtablewidth\global\LTcapwidth=\longtablewidth}
+\caption{\label{tab:table-proportion-scenario}Follow up comparisons for the proportion of fixations across decision scenarios.}\\
+\toprule
+strategy & \multicolumn{1}{c}{scenario} & \multicolumn{1}{c}{comparison} & \multicolumn{1}{c}{ROPE\_Percentage} & \multicolumn{1}{c}{rawdirection} & \multicolumn{1}{c}{p\_HDI} & \multicolumn{1}{c}{p\_direction}\\
+\midrule
+\endfirsthead
+\caption*{\normalfont{Table \ref{tab:table-proportion-scenario} continued}}\\
+\toprule
+strategy & \multicolumn{1}{c}{scenario} & \multicolumn{1}{c}{comparison} & \multicolumn{1}{c}{ROPE\_Percentage} & \multicolumn{1}{c}{rawdirection} & \multicolumn{1}{c}{p\_HDI} & \multicolumn{1}{c}{p\_direction}\\
+\midrule
+\endhead
+1st only & 0 & d1\_all & 0.00 & 1.00 & 0.000\% & > 0.999\\
+1st only & 1 & d1\_all & 0.00 & 1.00 & 0.000\% & > 0.999\\
+1st only & 2 & d1\_all & 0.00 & 1.00 & 0.000\% & > 0.999\\
+1st only & 3 & d1\_all & 0.00 & 1.00 & 0.000\% & > 0.999\\
+2nd only & 0 & d2\_all & 0.00 & 1.00 & 0.000\% & = 0.998\\
+2nd only & 1 & d2\_all & 0.00 & 1.00 & 0.000\% & > 0.999\\
+2nd only & 2 & d2\_all & 0.08 & 0.98 & 8.000\% & = 0.981\\
+2nd only & 3 & d2\_all & 0.26 & 0.93 & 25.800\% & = 0.931\\
+Partial Tallying & 0 & d1\_2 & 0.41 & 0.88 & 41.000\% & = 0.882\\
+Partial Tallying & 0 & d12\_34 & 0.00 & 1.00 & 0.000\% & > 0.999\\
+Partial Tallying & 0 & d3\_4 & 0.59 & 0.74 & 58.900\% & = 0.735\\
+Partial Tallying & 1 & d1\_2 & 0.57 & 0.77 & 57.400\% & = 0.77\\
+Partial Tallying & 1 & d12\_34 & 0.00 & 1.00 & 0.000\% & > 0.999\\
+Partial Tallying & 1 & d3\_4 & 0.63 & 0.67 & 62.600\% & = 0.667\\
+Partial Tallying & 2 & d1\_2 & 0.72 & 0.62 & 71.800\% & = 0.625\\
+Partial Tallying & 2 & d12\_34 & 0.32 & 0.95 & 32.400\% & = 0.948\\
+Partial Tallying & 2 & d3\_4 & 0.26 & 0.93 & 25.800\% & = 0.93\\
+Partial Tallying & 3 & d1\_2 & 0.65 & 0.65 & 65.100\% & = 0.652\\
+Partial Tallying & 3 & d12\_34 & 0.40 & 0.92 & 40.200\% & = 0.917\\
+Partial Tallying & 3 & d3\_4 & 0.02 & 0.99 & 1.600\% & = 0.99\\
+Serial Search & 0 & d1\_all & 0.00 & 1.00 & 0.000\% & > 0.999\\
+Serial Search & 1 & d1\_2 & 0.23 & 0.87 & 23.100\% & = 0.866\\
+Serial Search & 1 & d12\_34 & 0.00 & 1.00 & 0.000\% & > 0.999\\
+Serial Search & 2 & d1\_2 & 0.04 & 0.96 & 4.100\% & = 0.963\\
+Serial Search & 2 & d1\_3 & 0.00 & 1.00 & 0.000\% & = 0.995\\
+Serial Search & 2 & d2\_3 & 0.34 & 0.81 & 33.900\% & = 0.813\\
+Serial Search & 2 & d3\_4 & 0.31 & 0.84 & 31.000\% & = 0.844\\
+Serial Search & 3 & d1\_2 & 0.03 & 0.97 & 3.000\% & = 0.968\\
+Serial Search & 3 & d1\_3 & 0.00 & 0.99 & 0.000\% & = 0.993\\
+Serial Search & 3 & d2\_3 & 0.28 & 0.80 & 28.400\% & = 0.801\\
+Serial Search & 3 & d3\_4 & 0.36 & 0.71 & 36.300\% & = 0.709\\
+Tallying & 0 & d1\_2 & 0.01 & 0.98 & 0.700\% & = 0.982\\
+Tallying & 0 & d1\_3 & 0.00 & 0.99 & 0.000\% & = 0.989\\
+Tallying & 0 & d1\_4 & 0.00 & 1.00 & 0.000\% & = 0.997\\
+Tallying & 0 & d2\_3 & 0.39 & 0.69 & 38.600\% & = 0.694\\
+Tallying & 0 & d2\_4 & 0.32 & 0.82 & 31.900\% & = 0.816\\
+Tallying & 0 & d3\_4 & 0.48 & 0.64 & 48.200\% & = 0.641\\
+Tallying & 1 & d1\_2 & 0.42 & 0.61 & 42.000\% & = 0.612\\
+Tallying & 1 & d1\_3 & 0.10 & 0.94 & 9.900\% & = 0.936\\
+Tallying & 1 & d1\_4 & 0.11 & 0.93 & 11.300\% & = 0.931\\
+Tallying & 1 & d2\_3 & 0.15 & 0.90 & 15.300\% & = 0.904\\
+Tallying & 1 & d2\_4 & 0.17 & 0.90 & 17.000\% & = 0.905\\
+Tallying & 1 & d3\_4 & 0.47 & 0.55 & 47.300\% & = 0.553\\
+Tallying & 2 & d1\_2 & 0.15 & 0.92 & 15.300\% & = 0.918\\
+Tallying & 2 & d1\_3 & 0.35 & 0.71 & 35.400\% & = 0.711\\
+Tallying & 2 & d1\_4 & 0.10 & 0.94 & 9.900\% & = 0.938\\
+Tallying & 2 & d2\_3 & 0.36 & 0.78 & 35.900\% & = 0.784\\
+Tallying & 2 & d2\_4 & 0.47 & 0.58 & 46.800\% & = 0.584\\
+Tallying & 2 & d3\_4 & 0.29 & 0.85 & 29.100\% & = 0.85\\
+Tallying & 3 & d1\_2 & 0.10 & 0.94 & 9.800\% & = 0.945\\
+Tallying & 3 & d1\_3 & 0.12 & 0.92 & 11.700\% & = 0.922\\
+Tallying & 3 & d1\_4 & 0.38 & 0.70 & 38.100\% & = 0.702\\
+Tallying & 3 & d2\_3 & 0.41 & 0.52 & 40.700\% & = 0.516\\
+Tallying & 3 & d2\_4 & 0.24 & 0.88 & 23.500\% & = 0.879\\
+Tallying & 3 & d3\_4 & 0.22 & 0.87 & 22.500\% & = 0.866\\
+\bottomrule
+\end{longtable}
+
+\end{ThreePartTable}
+\efloatseparator
+ 
+\begin{ThreePartTable}
+
+\begin{longtable}{llllll}\noalign{\getlongtablewidth\global\LTcapwidth=\longtablewidth}
+\caption{\label{tab:table-last}Follow up comparisons for the last fixations.}\\
+\toprule
+strategy & \multicolumn{1}{c}{comparison} & \multicolumn{1}{c}{ROPE\_Percentage} & \multicolumn{1}{c}{rawdirection} & \multicolumn{1}{c}{p\_HDI} & \multicolumn{1}{c}{p\_direction}\\
+\midrule
+\endfirsthead
+\caption*{\normalfont{Table \ref{tab:table-last} continued}}\\
+\toprule
+strategy & \multicolumn{1}{c}{comparison} & \multicolumn{1}{c}{ROPE\_Percentage} & \multicolumn{1}{c}{rawdirection} & \multicolumn{1}{c}{p\_HDI} & \multicolumn{1}{c}{p\_direction}\\
+\midrule
+\endhead
+1st only & d1\_all & 0.00 & 1.00 & 0.00\% & > 0.999\\
+2nd only & d2\_all & 0.02 & 0.99 & 1.90\% & = 0.988\\
+Partial Tallying & d1\_2 & 0.54 & 0.53 & 54.10\% & = 0.534\\
+Partial Tallying & d12\_34 & 0.00 & 1.00 & 0.00\% & > 0.999\\
+Partial Tallying & d3\_4 & 0.18 & 0.96 & 18.50\% & = 0.959\\
+Serial Search & d1\_2 & 0.05 & 0.95 & 5.00\% & = 0.947\\
+Serial Search & d2\_3 & 0.06 & 0.97 & 6.10\% & = 0.968\\
+Serial Search & d3\_4 & 0.43 & 0.77 & 42.70\% & = 0.771\\
+Serial Search & lin1 & 0.21 & 0.64 & 20.80\% & = 0.638\\
+Serial Search & lin2 & 0.24 & 0.77 & 23.60\% & = 0.767\\
+Serial Search & lin3 & 0.15 & 0.54 & 14.60\% & = 0.54\\
+Tallying & d1\_2 & 0.18 & 0.87 & 17.80\% & = 0.869\\
+Tallying & d1\_3 & 0.01 & 0.97 & 1.30\% & = 0.968\\
+Tallying & d1\_4 & 0.00 & 0.99 & 0.00\% & = 0.991\\
+Tallying & d2\_3 & 0.25 & 0.85 & 24.80\% & = 0.849\\
+Tallying & d2\_4 & 0.10 & 0.93 & 10.40\% & = 0.934\\
+Tallying & d3\_4 & 0.44 & 0.71 & 43.90\% & = 0.714\\
+\bottomrule
+\end{longtable}
+
+\end{ThreePartTable}
+\efloatseparator
+ 
+\begin{ThreePartTable}
+
+\begin{longtable}{lllllll}\noalign{\getlongtablewidth\global\LTcapwidth=\longtablewidth}
+\caption{\label{tab:table-last-scenario}Follow up comparisons for the proportion of last fixations.}\\
+\toprule
+strategy & \multicolumn{1}{c}{scenario} & \multicolumn{1}{c}{comparison} & \multicolumn{1}{c}{ROPE\_Percentage} & \multicolumn{1}{c}{rawdirection} & \multicolumn{1}{c}{p\_HDI} & \multicolumn{1}{c}{p\_direction}\\
+\midrule
+\endfirsthead
+\caption*{\normalfont{Table \ref{tab:table-last-scenario} continued}}\\
+\toprule
+strategy & \multicolumn{1}{c}{scenario} & \multicolumn{1}{c}{comparison} & \multicolumn{1}{c}{ROPE\_Percentage} & \multicolumn{1}{c}{rawdirection} & \multicolumn{1}{c}{p\_HDI} & \multicolumn{1}{c}{p\_direction}\\
+\midrule
+\endhead
+1st only & 0 & d1\_all & 0.00 & 1.00 & 0.00\% & > 0.999\\
+1st only & 1 & d1\_all & 0.00 & 1.00 & 0.00\% & > 0.999\\
+1st only & 2 & d1\_all & 0.00 & 1.00 & 0.00\% & = 0.999\\
+1st only & 3 & d1\_all & 0.00 & 1.00 & 0.00\% & = 0.999\\
+2nd only & 0 & d2\_all & 0.03 & 0.98 & 2.80\% & = 0.98\\
+2nd only & 1 & d2\_all & 0.00 & 1.00 & 0.00\% & > 0.999\\
+2nd only & 2 & d2\_all & 0.45 & 0.73 & 44.90\% & = 0.726\\
+2nd only & 3 & d2\_all & 0.41 & 0.70 & 40.80\% & = 0.705\\
+Partial Tallying & 0 & d1\_2 & 0.22 & 0.90 & 21.70\% & = 0.898\\
+Partial Tallying & 0 & d12\_34 & 0.00 & 1.00 & 0.00\% & > 0.999\\
+Partial Tallying & 0 & d3\_4 & 0.14 & 0.96 & 14.00\% & = 0.962\\
+Partial Tallying & 1 & d1\_2 & 0.00 & 0.99 & 0.00\% & = 0.989\\
+Partial Tallying & 1 & d12\_34 & 0.00 & 1.00 & 0.00\% & > 0.999\\
+Partial Tallying & 1 & d3\_4 & 0.09 & 0.96 & 9.10\% & = 0.963\\
+Partial Tallying & 2 & d1\_2 & 0.43 & 0.61 & 42.90\% & = 0.606\\
+Partial Tallying & 2 & d12\_34 & 0.60 & 0.64 & 60.10\% & = 0.642\\
+Partial Tallying & 2 & d3\_4 & 0.00 & 1.00 & 0.00\% & = 0.997\\
+Partial Tallying & 3 & d1\_2 & 0.37 & 0.65 & 37.20\% & = 0.652\\
+Partial Tallying & 3 & d12\_34 & 0.57 & 0.54 & 56.70\% & = 0.537\\
+Partial Tallying & 3 & d3\_4 & 0.00 & 1.00 & 0.00\% & > 0.999\\
+Serial Search & 0 & d1\_all & 0.00 & 1.00 & 0.00\% & > 0.999\\
+Serial Search & 1 & d2\_all & 0.00 & 1.00 & 0.00\% & = 0.997\\
+Tallying & 0 & d1\_2 & 0.00 & 0.98 & 0.00\% & = 0.975\\
+Tallying & 0 & d1\_3 & 0.00 & 0.99 & 0.00\% & = 0.993\\
+Tallying & 0 & d1\_4 & 0.00 & 1.00 & 0.00\% & = 0.999\\
+Tallying & 0 & d2\_3 & 0.29 & 0.79 & 28.60\% & = 0.79\\
+Tallying & 0 & d2\_4 & 0.08 & 0.94 & 8.20\% & = 0.938\\
+Tallying & 0 & d3\_4 & 0.36 & 0.80 & 35.80\% & = 0.8\\
+Tallying & 1 & d1\_2 & 0.15 & 0.86 & 14.90\% & = 0.858\\
+Tallying & 1 & d1\_3 & 0.19 & 0.82 & 18.80\% & = 0.825\\
+Tallying & 1 & d1\_4 & 0.19 & 0.82 & 19.40\% & = 0.821\\
+Tallying & 1 & d2\_3 & 0.00 & 0.99 & 0.00\% & = 0.988\\
+Tallying & 1 & d2\_4 & 0.00 & 0.99 & 0.00\% & = 0.989\\
+Tallying & 1 & d3\_4 & 0.38 & 0.52 & 37.50\% & = 0.518\\
+Tallying & 2 & d1\_2 & 0.19 & 0.81 & 18.70\% & = 0.807\\
+Tallying & 2 & d1\_3 & 0.25 & 0.56 & 24.70\% & = 0.559\\
+Tallying & 2 & d1\_4 & 0.18 & 0.84 & 18.00\% & = 0.841\\
+Tallying & 2 & d2\_3 & 0.16 & 0.89 & 15.60\% & = 0.889\\
+Tallying & 2 & d2\_4 & 0.36 & 0.55 & 36.00\% & = 0.549\\
+Tallying & 2 & d3\_4 & 0.10 & 0.92 & 10.30\% & = 0.919\\
+Tallying & 3 & d1\_2 & 0.13 & 0.88 & 12.60\% & = 0.881\\
+Tallying & 3 & d1\_3 & 0.01 & 0.97 & 1.30\% & = 0.969\\
+Tallying & 3 & d1\_4 & 0.24 & 0.51 & 24.50\% & = 0.506\\
+Tallying & 3 & d2\_3 & 0.20 & 0.79 & 20.30\% & = 0.794\\
+Tallying & 3 & d2\_4 & 0.09 & 0.92 & 9.10\% & = 0.916\\
+Tallying & 3 & d3\_4 & 0.00 & 0.98 & 0.00\% & = 0.985\\
+\bottomrule
+\end{longtable}
+
+\end{ThreePartTable}

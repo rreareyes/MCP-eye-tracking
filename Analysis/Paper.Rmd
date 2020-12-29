@@ -1,0 +1,380 @@
+---
+title             : "The title"
+shorttitle        : "Title"
+
+author: 
+  - name          : "Ramiro Eduardo Rea Reyes"
+    affiliation   : "1"
+    corresponding : no    # Define only one corresponding author
+    email         : "rreareyes@umass.edu"
+    address       : ""
+  - name          : "Youngbin Kwak"
+    affiliation   : "1"
+
+affiliation:
+  - id            : "1"
+    institution   : "University of Massachusetts, Amherst"
+
+
+authornote: |
+  X
+
+abstract: |
+  "X"
+  
+keywords          : "keywords"
+wordcount         : "X"
+
+bibliography      : 
+  - "References/Heuristics.bib"
+  - "References/Eye-tracking_methods.bib" 
+  - "References/software.bib"
+  - "References/Modeling.bib"
+  - "References/Instruments_surveys.bib"
+  
+appendix          :
+  - "Scripts/M13_supplementary_figures.Rmd"
+
+floatsintext      : no
+figurelist        : yes
+tablelist         : yes
+footnotelist      : no
+linenumbers       : no
+mask              : no
+draft             : no
+
+documentclass     : "apa6"
+classoption       : "man"
+output            : papaja::apa6_docx
+#   papaja::apa6_pdf:
+# # output            : 
+# #   papaja::apa6_docx:
+#     includes:
+#       after_body: "Scripts/D_supplementary_figures.Rmd"
+
+header-includes:
+     - \usepackage{longtable}
+     - \usepackage{subcaption}
+     - \usepackage{grffile}
+   
+---
+
+```{r setup, include = FALSE}
+library(papaja)
+library(kableExtra)
+library(tidyverse)
+
+```
+
+```{r base-paths, echo = F, message=F, warning=F}
+folder_root <- getwd()
+
+folder_references <- file.path(folder_root, "References")
+folder_documents  <- file.path(folder_root, "Documents")
+folder_scripts    <- file.path(folder_root, "Scripts")
+folder_results    <- file.path(folder_root, "Results", "Summaries")
+folder_figures    <- file.path(folder_root, "Figures")
+
+r_refs(file = file.path(folder_references, "software.bib"))
+
+software_citations <- cite_r(file     = file.path(folder_references, "software.bib"),
+                             pkgs     = c("rstan", "brms"),
+                             withhold = F)
+
+# Load reporting functions
+source(file = file.path(folder_scripts, "Functions", "F02_reporting.R"))
+
+```
+
+```{r stats-and-summaries, echo = F}
+load(file.path(folder_results, "basic_summaries.RData"))
+load(file.path(folder_results, "bayes_comparisons.RData"))
+load(file.path(folder_results, "bayes_intervals.RData"))
+load(file.path(folder_results, "bayes_rope.RData"))
+
+```
+
+# Introduction
+Choosing between two options is arguably one of the most common decision scenarios we face in our daily life. Picking between two different sweets for dessert, wearing a white or blue shirt to a job interview, getting a cat or a dog, etc. All these seem like fairly easy decision to make, however, we can also imagine scenarios where the amount of things to consider is not trivial. Buying a house located closer to work or closer to your friends; choosing between two universities who offered you acceptance letters; deciding to proceed with treatment A or B for a chronic disease, etc. 
+
+These choices, beside varying on the specific topic they are made on, also differ in how much information an agent has before making her decision. @luceGamesDecisionsIntroduction1989 define 3 clear states of the world: certainty (the choice leads invariably to a known outcome), risk (the choice leads to a set of possible outcomes, each having a known probability of occurring), and uncertainty (each choice leads to one of a set of possible outcomes, whose probabilities are not known by the agent). 
+
+How to study these problems is also a big discussion in itself. [@savageFoundationsStatistics1954] made the distinction between small and large worlds in decision problems. Small worlds represent decision scenarios were the agent has complete knowledge of the possible outcomes of each action and its probabilities of occurrence (decisions under risk in the Luce-Raiffa framework). Large worlds on the other hand, represent scenarios were some of the information (possible outcomes and/or its probabilities of occurring) is hidden to the agent, and she can only generate subjective estimates at most (decisions under uncertainty). Although future research following Savage’s steps, assumed that uncertain scenarios can be treated as risky scenarios by making some reasonable assumptions on the hidden probabilities from each outcome [@kozyrevaInterpretationUncertaintyEcological2019]. 
+
+@simonBehavioralModelRational1955 integrated the concept of decisions under uncertainty into what he called bounded rationality. Moreover, in further works, he extended the concept of uncertainty in decision making to encompass not only the constraints caused by incomplete information, but also the computational limitations of the agent to fully process it, making it very hard to reliably determine the underlying structure of the environment [@simonTheoriesBoundedRationality1972]. These limitations present a clear problem for the underlying assumptions made in classical definitions of rationality, which rely in the use of logic and probability under small worlds. Therefore, a new interpretation of rationality needed to consider the inseparable nature of the two blades that shape rationality according to Simon's analogy: "the structure of the task environment and the computational capabilities of the actor" [@simonInvariantsHumanBehavior1990]. 
+
+This whole idea lies at the center of the ecological rationality program. Here, what makes an agent and her decisions rational is not the degree of adherence with some normative benchmark, but their fit to the specific environment where the decision is taking place. This approach puts front and center the role of the environmental structure in determining what strategies are adequate to use [@gigerenzerSimpleHeuristicsThat1999]. It is important to distinguish here that this approach does not look for an optimal strategy. Under the consideration that the uncertainty on the decision environment cannot be reduced or simplified to risk, the optimal approach is unknown. Instead, under this framework, a *satisficing* strategy or strategies are considered as ecologically valid. Satisficing only implies to reach a given criterion of "good enough" performance, where the information accumulation process stops and the decision is made [@simonRationalChoiceStructure1956].
+
+Now, considering both the constraints imposed from an uncertain environment, and the finite cognitive resources that can be invested, agents face a key problem: how much information should I gather before committing to one of the options? As we briefly touched before, in classic decision theory, we would determine an optimal performance level, based in an analytic utility function or in a probabilistic approximation of it. These optimal models represent a perfect observer that can integrate all the evidence in the environment and therefore determine which of the options maximizes the reward obtained at a given moment. Unsurprisingly, decision makers tend to underperform compared to these benchmarks, a fact that is widely observed in the decision making literature [@gilovichHeuristicsBiasesPsychology2002]. Instead, agents tend to use simpler strategies that dismiss some of the information presented, reducing the search space. These strategies were referred as heuristics [@newellHumanProblemSolving1972; @tverskyJudgmentUncertaintyHeuristics1974; @simonInvariantsHumanBehavior1990], considered mere suboptimal shortcuts, inferior to their analytic and probabilistic counterparts.
+
+The heuristics and biases framework, which spread from the work from @tverskyJudgmentUncertaintyHeuristics1974, focused on showing the systematic deviations of people's decision making process from the decision based in rational-agents [@kahnemanMapsBoundedRationality2003]. The definition of rationality here is based on the degree of adherence of an agent's choices to normative models based in analytic or statistical solutions [@hammondHumanJudgmentSocial1996] in contrast the correspondence to the decision environment, as conceived within the ecological rationality framework. 
+
+An alternative interpretation of these behaviors is offered by the idea of the adaptive toolbox developed by the ABC research group [@gigerenzerSimpleHeuristicsThat1999]. Here, a heuristic is defined as a strategy that aims to achieve decisions that are faster, frugal and/or more accurate than other complex methods, while ignoring certain parts of the information at hand [@gigerenzerHeuristicDecisionMaking2011]. This not only emphasizes the diminished effort for the decision maker, but also the possibility to be more accurate with less information, especially in scenarios with high levels of uncertainty, referred as the less-is-more effect. In line with ecological rationality, the decision agent would adaptively select the appropriate heuristic for the job from the available set of strategies in her toolbox.  
+
+One of the most studied scenarios in the adaptive toolbox research uses binary choice paradigms [e.g., @broderDecisionMakingAdaptive2003; @dieckmannInfluenceInformationRedundancy2007; @rieskampSSLTheoryHow2006; @broderAssessingEmpiricalValidity2000; @leeEvidenceAccumulationDecision2004]. In these setups, the decision maker is presented with two options which have certain number of attributes to be evaluated. Each of those attributes tends to be a binary feature, i.e., having two possible states, but only one can be present at a time in a given option. Then, the participant needs to learn how to discern which alternative is superior, based on the sequential choices made and the observed outcome from these. Each of the different attribute's states has a validity associated with it, which is just the probability that the presence of a given feature predicts the correct option. 
+
+There are multiple strategies that the agent can implement to solve these types of problems, each varying on the amount of information needed before making a choice. Broadly, we can divide these strategies in non-compensatory, relying in a single discerning feature to make their choice, and compensatory, more involved strategies that consider several features to determine the best option [@rieskampWhenPeopleUse1999]. 
+
+A strong example of compensatory strategies is the linear integration of pieces of information, which is referred as Weighted Additive (WADD) model, [@payneAdaptiveDecisionMaker1993], or the Franklin rule [@gigerenzerBettingOneGood1999]. This strategy integrates all the pieces of information available by first determining the winning states in each of the two options, then it multiplies the cues by their validities (subjective weights assigned by the agent) to finally add them up and select the option with the highest score. This strategy is very successful in most decision scenarios, however, its correct implementation is complicated and taxes highly the cognitive resources of the agent.
+
+Another well studied compensatory strategy is the Dawes rule [@dawesLinearModelsDecision1974]. This heuristic also considers all the pieces of information, but instead of assigning a different subjective validity to each one of them, it weights them equally. In the end, it reflects a sum of the positive states of each cue, and then chooses the one with the highest score. This strategy is also fairly successful in both non-compensatory and compensatory environments and although it is less taxing, it is by no means frugal in the usage of information.
+
+Among the non-compensatory strategies, the take-the-best (TTB) heuristic  [@gigerenzerReasoningFastFrugal1996] stands out both for its frugality in cue usage, as well as its lack of estimation of subjective weights to each piece of information. This decision model belongs to the "one reason decision making heuristics", since it relies in the discerning cue with the highest validity to make its choice. For this, it assumes that there is an underlying ranking among the cue validities. Its search starts from the most important feature and continues in descending order of importance, until a discriminating feature allows to distinguish between the options, choosing the one with the winning feature state. This strategy is very robust, and tends to surpass or match the accuracy from complex models like linear regression (i.e., Franklin rule) in multiple decision scenarios [@czerlinskiHowGoodAre1999]
+
+There are several studies that have looked into what strategies and search patterns are implemented by decision makers to solve these paired comparison problems. However, there is a wide heterogeneity in terms of the environmental structure, information acquisition costs, and how the features were presented. All these can influence one way or another which strategies would be used more commonly among agents (as we would expect if we suppose their adaptive toolbox is sensitive to the underlying environmental structure).
+
+For instance, adding costs to information acquisition either as monetary payments [e.g @newellEmpiricalTestsFastandfrugal2003; @broderAssessingEmpiricalValidity2000; @rieskampSSLTheoryHow2006 experiment 3] or asking the participants to click with a mouse to reveal features [@payneAdaptiveStrategySelection1988; @rieskampSSLTheoryHow2006 experiments 1 and 2; @vanravenzwaaijHierarchicalBayesianModeling2014] tends to reduce the amount of information consulted by participants. Time pressure has shown a similar effect, biasing towards frugal strategies that ignore some pieces of information [@bobadilla-suarezFastFrugalNot2018; @oh-descherProbabilisticInferenceTime2017; @ohSatisficingSplitsecondDecision2016 TP stages]. Using paradigms that are based in presence/absence of binary features tend to bias agents to use strategies that count the present features [@leeEvidenceAccumulationDecision2004]. Moreover, presenting the cue rankings explicitly  or hinting the presence of a ranking [@ohSatisficingSplitsecondDecision2016 NP stages] seems to lean agents towards the usage of compensatory strategies, albeit this is not universally applied by all participants [@broderAssessingEmpiricalValidity2000; @nelsonTheoryHeuristicOptimal2018; @newellTakeBestLook2003].
+
+In this work, we intend to provide an account of what are the naturally occurring strategies in naive agents and their prevalence to solve a two-option forced choice problem. Moreover, we want to present an environment similar to what an inexperienced decision maker may face. We do this by providing a full learning set where they must discover the structure of the environment while having limited search time that is tailored to their performance. Additionally, we aim to describe what search patterns these agents present by using an eye-tracker, an approach that we think provides more insight into the actual implementation of the decision strategies, while allowing them to sample without an explicit cost.
+
+# Methods
+## Participants
+We collected a total of `r printnum(sum(summary_demographics$n))` participants from the student population of the University of Massachusetts, Amherst. These subjects participated in two separate experiments (Experiment 1 and Experiment 2; E1 and E2). From them `r printnum(sum(summary_demographics$n[summary_demographics$experiment == 1]))` participated in E1, `r printnum(filter(summary_demographics, experiment == "1") %>% filter(gender == "Female") %>% select(n) %>% .[[1]])` were females (mean age = `r filter(summary_demographics, experiment == "1") %>% filter(gender == "Female") %>% select(mean_age) %>% .[[1]]` SD = `r filter(summary_demographics, experiment == "1") %>% filter(gender == "Female") %>% select(sd_age) %>% .[[1]]`) and `r printnum(filter(summary_demographics, experiment == "1") %>% filter(gender == "Male") %>% select(n) %>% .[[1]])` were males (mean age = `r printnum(filter(summary_demographics, experiment == "1") %>% filter(gender == "Male") %>% select(mean_age) %>% .[[1]])`, SD = `r filter(summary_demographics, experiment == "1") %>% filter(gender == "Male") %>% select(sd_age) %>% .[[1]]`). For E2, we had a total of `r printnum(sum(summary_demographics$n[summary_demographics$experiment == 2]))` participants, from which `r printnum(filter(summary_demographics, experiment == "2") %>% filter(gender == "Female") %>% select(n) %>% .[[1]])` were females (mean age = `r filter(summary_demographics, experiment == "2") %>% filter(gender == "Female") %>% select(mean_age) %>% .[[1]]` SD = `r filter(summary_demographics, experiment == "2") %>% filter(gender == "Female") %>% select(sd_age) %>% .[[1]]`) and `r printnum(filter(summary_demographics, experiment == "2") %>% filter(gender == "Male") %>% select(n) %>% .[[1]])` were males (mean age = `r printnum(filter(summary_demographics, experiment == "2") %>% filter(gender == "Male") %>% select(mean_age) %>% .[[1]])`, SD = `r filter(summary_demographics, experiment == "2") %>% filter(gender == "Male") %>% select(sd_age) %>% .[[1]]`). We compensated all of them with a flat rate of class credit or \$12, as well as a monetary bonus of \$3 based on task performance. All participants provided informed consent in line with the Institutional Review Board from the University of Massachusetts, Amherst.
+
+## Procedure
+After signing the consent form, we presented participants with a probabilistic multi-cue forced-choice paradigm adapted from @ohSatisficingSplitsecondDecision2016. The task consists of repeatedly exposing the participants to different nonverbal compound cues with an unknown distribution of probabilistic weights. The validities from each piece of information are learned through trial and error. We selected this design since it allows to emulate the uncertainty underlying the outcomes of their choices, a large number of unique information pieces to avoid memorization, and to minimize the influence of semantic expertise in any field on the performance of our subjects.
+
+We designed the task in MATLAB, using the Psychophysics Toolbox extension (@brainard_psychophysics_1997). We monitored eye-movements with a RED250mobile eye tracker from SMI, using the SMITE toolbox @niehorster_smite_2020 to link it to our task. 
+
+### Stimuli
+We framed our experiment as a race between two different pilots, which had four different pieces of equipment (domains) with 2 possible brands on each (binary states). The compound cues we used were two 2x2 grids, i.e., squares with 4 cells (each cell corresponding to a domain), presented at the right and left side of the screen (figure \@ref(fig:stimulus)). Each domain contained a different item, presenting one of two possible states. These states, unknown to the participants, had complementary distribution of probabilistic weights (figure \@ref(fig:weights)). These weights are the probabilities of winning from each state. The distance between a given pair of weights (e.g., 0.95-0.05 = 0.9) represents an objective measure of the validity (importance) of each domain towards predicting the winning option.
+
+We used all possible combinations of cue states which gave us a total of 16 unique grids (4^2 = 16). Also, we used all non-repeating pairs of cues, giving us a total of 120 unique stimuli ([16^2/2] - [16/2]). Mirroring these stimuli (i.e., switching the position from left to right) gives us a full set of 240 pairs of cues.
+
+The position of equipment and brands was the same for all the participants. However, there are 24 different combination of the underlying weights, which we allocated semi-randomly across subjects. 
+
+## Procedure
+In both experiments, the task consisted on three phases: a training phase (TP), with a full set of 240 trials divided in 4 blocks of 60 trials, and two testing phases, each with a set of 120 unique trials, divided in 2 blocks. During the first testing phase (T1) we kept the same contingencies from TP (Figure \@ref(fig:weights)). For the second testing phase (T2) we introduced changes in the weights across domains in both experiments. For 0 we assigned to all the different domains a distribution of 0.80/0.20, preserving the winning cue states (Figure \@ref(fig:weights-equal)). On the other hand, for 1 we inverted the distribution (Figure \@ref(fig:weights-inverted)), making the most informative cue (0.95/0.05) have the contingencies from the least informative cue (0.5001/0.4999)
+
+We included T2 to test whether participants used decision heuristics that prioritize certain pieces of information over others or if they used compensatory strategies that considered all the domains. This change in contingencies would negatively affect the performance of subjects using non compensatory strategies, since they would disregard pieces of information that are relevant under the new environment. Subjects using compensatory strategies should not show a change in their performance, since the new scenario will still favor integration of more pieces of information. 
+
+After completing the WASI subscale, we explained the task to the subjects. We told them that they would have to choose between two pilots that had different equipment which one they think would win the race. We also mentioned that, at the beginning of the task they had no information about which brand or equipment gave more chances of winning to a pilot, but that they would learn with trial an error. We instructed them to pay attention of which combinations of equipment made them win more often. Finally, we explained them that their goal was to obtain as many points as possible, and how they could earn them during the task. 
+
+Each trial they won got them 1 point, while fast responses in winning trials gave them 2 points. Any trial where they chose the losing pilot, where they failed to respond within 15 seconds or where their response was too slow yielded no points. The outcome of each trial was determined by getting the probability of winning from the grid selected by the subject which was determined using the following equation:
+
+$$P(L|C) = \frac {10^{\sum_{n=1}^ {4} (w_{ci,l} - w_{ci,l})}} {1+10^{\sum_{n=1}^ {4} (w_{ci,l} - w_{ci,l})}}$$
+
+Then, we compared this number with a random draw from a uniform distribution from 0 to 1. If the value from the grid selected was larger than this random number, they could win the trial, if their RT followed the conditions described above.
+
+We included the speed threshold to emulate the time pressure faced commonly in decision making scenarios, however, to avoid punishing unfairly subjects which had slower RT, we determined the threshold as +1 SD from their mean RT for the slow responses and -1 SD for fast responses. Finally, we determined a 400 points threshold for receiving the monetary bonus at the end of the task. This threshold was determined estimating 70% winning trials with 30% of them being fast responses.
+
+The participants chose between the two grids, using the left or right arrow in a keyboard. We provided feedback showing the points earned in each trial and a summary of the points acquired during each block, with a total sum showed at the end of the task. 
+
+## Data analysis
+We determined subjects' performance based on the number of accurate choices they made. We defined a correct choice as a trial where the participant selected the grid with higher chances of winning, regardless of whether they won or not the trial. For the eye-tracking data, we identified fixations using the I2CM algorithm from @hessels_noise-robust_2017. We determined the location of the fixations by defining eight squared AOIs of 200x200 pixels centered in each domain from both cues.
+
+### Model classification
+We used the participants' responses in each of the different cue configurations as input to classify them across different decision models. We used only the trials during T1, given that at this point, we assumed that participants should have a more crystallized strategy to solve the problem. We followed a similar approach as @ohSatisficingSplitsecondDecision2016, creating a total of 15 models which account for all the combinations of possible information usage (Figure \@ref(fig:decision-models), 1-15). Additionally, we accounted for two additional strategies widely referred in the literature as feasible in decision paradigms like this: Tallying (equal weighting of information) and Take-The-Best (TTB) which is a type of lexicographic search. The tallying strategy assumes that all the domains would be of equal informational value for the decision maker, and integrates all the pieces of information as a single predictor, i.e., it sums all the positive attributes and chooses the option with a higher number of these features. On the other hand, TTB ranks the domains according to how predictive they are of the outcome, and searches serially starting from the most important feature, stopping as soon as there is a difference between options, choosing the one with the winning state of the attribute. Additionally, we created models that accounted for an incomplete use of these strategies, i.e., where only part of the domains were consulted and included in the decision process (Figure \@ref(fig:decision-models), 16-21). 
+
+All these were logistic models, with different number of predictors (one for each domain used) or with different predicted outcome based on the domain arrangement (Serial Search). We used variational Bayesian inference, with the help of the MATLAB tool from @drugowitschVariationalBayesianInference2019 using model 15 (fully compensatory strategy using all domains) as the reference to compare all others. We assigned participants to the different decision groups, based on the model with the highest support (with a BF >3 compared to the reference model) given each subject's responses.
+
+### Parameter estimation and contrasts
+Finally, to estimate the differences in accuracy and search patterns among these decision groups, we performed bayesian parameter estimation using `r software_citations`. All the comparisons reported use a ROPE of 0.1 on a standardized scale for log odds. For the accuracy in the different phases, we used a hierarchical logistic model, whereas the fixation analyses are built as hierarchical multinomial models.
+
+All models estimated random effects for each participant, nested within groups. Each model was fitted using 4 chains with enough iterations to reach 10,000 ESS in the group level random parameters, in order to have reliable estimation of the standard deviation of the posterior. Given the complexity of the models, we assigned a small step size for the MCMC algorithm (0.99) to get rid of divergences while exploring the parameter space. Correspondingly, we also adjusted the treedepth (12-14) to allow the model to continue exploring for enough time.
+
+For all the priors for the covariance matrices between random intercepts and slopes, we used a mildly regularizing prior of 2 for the $\rho$ parameter. For the variability among participants and groups, we used a mildly informative half Gaussian prior centered at 0, with a $\sigma$ of 2.
+
+Finally, we used the posterior samples transformed to standardized difference (Cohen $\delta$) to perform the follow up comparisons.
+
+# Results
+
+## Strategy classification
+The results from the model selection showed heterogeneity in the strategy usage across the two experiments (figure \ \@ref(fig:classification)). Two strategies are predominant among participants in both experiments: relying solely on the information from the most informative domain (1st only) and an incomplete integration of an equal weights to all the domains (Partial Tallying). Besides these two, we decided to examine the other strategies that would give participants good performance in this task. The first candidate for this was the lexicographic strategy Take-the-Best, for which there is widespread knowledge of its efficiency in non-compensatory binary decision paradigms like this. We also included the incomplete version of this strategy, combining both into a "Serial Search" decision group. Finally, we decided to also include participants whose choices showed a strong reliance in the second most informative domain (2nd only), since this strategy should yield still reasonable performance on T1. On figure \@ref(fig:classification-reduced) we display these decision strategies and their frequency from across participants of both experiments. **Should we include a table detailing BF for each model?**
+
+## Performance
+First, we wanted to assess participant's accuracy to identify and select the option with the highest chance of winning. For this, we took their responses and label them as correct when they selected the side with the highest probability of success, regardless if they won or lost that trial.We removed ambiguous cases where the probability for both sides was 0.50. Moreover, we wanted to provide estimates for the possible changes in this metric as a consequence of the different environments in E1 and E2. To do this, we ran a hierarchical logistic model, using both the experiment and phase as separate predictors to estimate the probability of choosing the winning side. Finally, since we thought that different decision strategies may be affected in distinct ways by these changes, we included in our model random effects and intercepts for each participant, nested within decision groups. For our priors, we used a Gaussian distribution for the effects and the intercept, centered at 2, with a sigma of 2. These values were selected, given the fact that we know that these strategies should perform well above chance level (0 in log odds), but we gave enough leeway for the model to explore different values. 
+
+We extracted samples from the posterior for the accuracy of the different strategies in each phase for both E1 and E2. We can see that the changes in contingencies across T1 and T2 affected the decision groups differently (figure \@ref(fig:performance)). To look this in more detail, we looked at the difference in performance between the two phases (figure \@ref(fig:performance-change) and table \@ref(tab:table-performance-change)). These comparisons show that, during E1, only the Partial Tallying group showed a meaningful reduction on their performance (`r filter(rope_performance_change, experiment == "0") %>% report(strategy = "Partial Tallying")`). Additionally, participants on the Serial Search group also showed a negative trend in their performance (`r filter(rope_performance_change, experiment == "0") %>% report(strategy = "Serial Search")`) but there is too much uncertainty on its magnitude. E2 shows a stronger effect across decision groups, decreasing strongly the performance of 1st Only (`r filter(rope_performance_change, experiment == "1") %>% report(strategy = "1st only")`), Partial Tallying (`r filter(rope_performance_change, experiment == "1") %>% report(strategy = "Partial Tallying")`), and Serial Search (`r filter(rope_performance_change, experiment == "1") %>% report(strategy = "Serial Search")`). On the other hand, participants classified as Tallying users show no meaningful change in their performance between phases (`r filter(rope_performance_change, experiment == "1") %>% report(strategy = "Tallying")`), which matches their expected performance. Finally, despite the negative trend, we did not observe a meaningful decrease in accuracy for participants in the 2nd only strategy (`r filter(rope_performance_change, experiment == "1") %>% report(strategy = "2nd only")`)
+
+Moreover, when we compared the performance at T1 across strategy groups (figure \@ref(fig:performance-T1)) we found that Serial Search users tend to outperform more frugal strategies (1st only vs Serial Search: `r report(rope_performance_T1, comparison = "first_serial")`; 2nd only vs Serial Search: `r report(rope_performance_T1, comparison = "second_serial")`). Additionally, this strategy has also a tendency to outperform more compensatory strategies (Serial Search vs Tallying `r report(rope_performance_T1, comparison = "serial_tally")`; Serial Search vs Partial Tallying `r report(rope_performance_T1, comparison = "serial_lazy")`) however there is a lot of uncertainty in our estimates as both 89% HDI for both comparisons still have some of their mass inside the designated ROPE. All paired comparisons are reported in detail in table \@ref(tab:table-performance-T1)
+
+## Fixation patterns in each strategy
+Although the decision models we created considered a wide array of information usage, there are some underlying assumptions that can only be explored by actually looking at the sampling patterns from the participants. For this reason, we used a series of eye tracking benchmarks to evaluate the starting point, spread of search and stopping point of the different models during T1. 
+
+In general, these strategies have three main elements [@gigerenzerSimpleHeuristicsThat1999] that allow to describe them:
+
+* A search rule entailing the direction of the sampling in the information space.
+* A stopping rule that defines when the search stops.
+* A decision rule that determines what option is selected based on the evidence collected.
+
+In this analysis, we focus on the first two elements, which define the search patterns that the agent must follow under each strategy.
+
+To assess the starting point of the sampling process, we looked at the location of the first fixation using a hierarchical multinomial model, with a variable intercept for every participant, nested within decision groups. Each trial had four different outcomes, one for each of the domains presented. Figure \@ref(fig:first) shows the proportion of first fixations allocated to each of the 4 domains by order of importance. 
+
+Next, to benchmark the spread of the sampling, we examined the allocation of fixations across the different domains. For this we used a hierarchical multinomial model with 4 outcomes similar to the one described above, but considering all the fixations in T1. In figure (figure \@ref(fig:proportion)) we can see the overall allocation of fixations across domains for each decision group. 
+
+Finally, to review the stopping point of the sampling process, we looked at the location of the last fixation in each trial. Again, using a hierarchical multinomial model with 4 outcomes, but using the only the last fixation recorded in each trial. In figure (figure \@ref(fig:last)) we can see the distribution of last fixations across domains.
+
+Now, even though these metrics allow us to present a more detailed picture of the sampling process, they are insufficient to check its consistent application during the task. Moreover, some of these strategies, specifically, the ones using serial sampling, have a dynamic nature, depending on the particular states in each domain, and their ranking in terms of relative importance to other pieces of information. Specifically, these assume that the participant would start searching in descending order of importance, and stop sampling as soon as she determines there is a difference between cues in the highest ranking domain. This means that we would expect more sampling for information as the best discriminating domain is located further down in the scale of importance. 
+
+For these reasons, to analyze if this behavior was present in any of the decision strategies, we grouped trials according to which domain was discriminating between cues, in descending order of importance (\@ref(fig:scenarios)). This creates four decision scenarios:
+
+* When the cue states in the 1st domain (ranked by importance) are different (A).
+* When cue states are the same in 1st domain, but different in the 2nd (B).
+* When cue states in both 1st and 2nd domain are the same, but the 3rd shows different states (C).
+* All the domains but the least important have the same state (D). 
+
+We added these as a predictor in our statistical models, and allowed its slope to vary across participants, nested within decision groups. We applied this to assess if this had an effect to both the start (figure \@ref(fig:proportion-scenario)), spread (figure \@ref(fig:proportion-scenario)), and end (figure \@ref(fig:last-scenario)) of the sampling process.
+
+### First only
+This model assumes that participants would only rely on the most informative domain to make their choices. This means that any instance where the most important cue is not different between cues, they should simply choose randomly between them. Therefore, we would expect a consistent preference towards the most informative domain in all the eye tracking measures. 
+
+We found that participants in this group tend to direct their first fixations towards the most important domain more often (figure \@ref(fig:first-comparisons), panel A), in comparison to the other domains (`r report(rope_first, strategy = "1st only")`). Using the decision scenario as a predictor in this metric (figure \@ref(fig:first-scenario-comparisons-A, panel A)) did not reveal any change in this pattern (`r report(rope_first_scenario, strategy = "1st only")`). This pattern repeats when we take a look to the overall allocation of fixations (figure \@ref(fig:proportion-comparisons), panel A), showing a higher proportion towards the first domain vs the rest of the pieces of information (`r report(rope_proportion, strategy = "1st only")`). When we consider the different decision scenarios (figure \@ref(fig:proportion-scenario-comparisons-A) panel A), this result remains consistent, still favoring the most important domain (`r report(rope_first_scenario, strategy = "1st only")`). Moreover, when we look at the stopping point for this strategy (figure \@ref(fig:last-comparisons), panel A), we also see a preference for the most important domain (`r report(rope_last, strategy = "1st only")`). Finally, this remains consistent when we introduce the decision scenario as a predictor (figure \@ref(fig:last-scenario-comparisons-A), panel A), still displaying their preference towards the most informative domain (`r report(rope_last_scenario, strategy = "1st only")`).
+
+### Second only
+This strategy is similar to the previously described, differing only in its reliance instead on the second most informative domain. This can happen as a overestimation of its importance by the participants using this strategy, leading them to think this domain is the most predictive of success in the task. Again, this should be reflected by a consistent preference for the second most important domain, which should not be affected by decision scenarios.
+
+As expected, we see how these subjects preferred the 2nd most important domain as their starting point for their sampling (figure \@ref(fig:first-comparisons), panel B; `r report(rope_first, strategy = "2nd only")`). However, we see that this effect is not as big as the observed in the 1st only strategy, which manifests further down when we take a look at this metric across decision scenarios (figure \@ref(fig:first-scenario-comparisons-A), panel B). Here, although the probability of direction favors the 2nd most important domain (figure \@ref(fig:first-scenario-comparisons-A), panel B), our estimation carries a lot of uncertainty, and therefore we cannot conclude this effect is meaningful in any of the decision scenarios (`r report(rope_first_scenario, strategy = "2nd only")`). Looking at the sampling spread for this strategy, it shows us an overall preference for the second most important domain (figure \@ref(fig:proportion-comparisons), panel B; `r report(rope_proportion, strategy = "2nd only")`). This pattern holds for scenario A and B, but the scenario C and D, while they show a probability of direction favoring the 2nd domain, they still show high uncertainty in its magnitude (figure \@ref(fig:proportion-scenario-comparisons-A); `r report(rope_proportion_scenario, strategy = "2nd only")`). Finally, the stopping point for this strategy shows a tendency to favor the expected domain, however, this difference overlaps with the defined ROPE, which indicates this may not be a meaningful effect (figure \@ref(fig:last-comparisons), panel B; `r report(rope_first, strategy = "2nd only")`). When we look more closely at each decision scenario, we can see that the last fixation only shows a meaningful effect favoring the 2nd domain in scenario B (figure \@ref(fig:last-scenario-comparisons-A), panel B; `r report(rope_last_scenario, strategy = "2nd only")`).
+
+### Serial Search
+So far, the strategies analyzed predict static patterns, preferring always a particular domain over the others. For users of a strategies that rely in conditional sampling, this changes depending on the state of the information presented in a given trial. In particular, for the participants grouped in our Serial Search group, we predict they should start by looking at the most important domain, comparing it between cues, and only continue sampling if this does not discriminate between cues. Therefore, we expect an overall preference for the most important domain in all the metrics we used, however, as we divide the trials by decision scenarios, we would expect that participants using this strategy should allocate more fixations to the other domains, and they should finish their sampling further down in the domain rankings.
+
+Our results show that in effect, these participants start on the most important domain (figure \@ref(fig:first-comparisons), panel C; `r report(rope_first, strategy = "Serial Search")`), remaining constant across decision scenarios (figure \@ref(fig:first-scenario-comparisons-A), panel C; `r report(rope_first_scenario, strategy = "Serial Search")`). For the proportion of fixations, we were interested in testing whether participants allocated their fixations following a linear trend, for which purpose we performed a series of paired comparisons (figure \@ref(fig:proportion-comparisons)). We found meaningful differences between the most important levels (1st vs 2nd: `r report(rope_proportion, strategy = "Serial Search", comparison = "d1_2")`; 2nd vs 3rd: `r report(rope_proportion, strategy = "Serial Search", comparison = "d2_3")`), but not for the 3rd vs 4th (`r report(rope_proportion, strategy = "Serial Search", comparison = "d3_4")`). When comparing the magnitude of the meaningful effects we found, we did not find any differences between them, indicating a linear relationship between fixation proportions and domain importance from the 1st to the 3rd most important domain (`r report(rope_proportion, strategy = "Serial Search", comparison = "lin1")`). Looking at the sampling across scenarios (\@ref(fig:proportion-scenario-comparisons-B)), we can see that the fixations in scenario A, favor the most important domain (`r report(rope_proportion_scenario, strategy = "Serial Search", scenario = "0")`). In scenario B, the difference between the fixations to domain 1 and 2 narrows, making it not meaningful anymore (`r report(rope_proportion_scenario, strategy = "Serial Search", scenario = "1", comparison = "d1_2")`), while still being larger than the proportion of fixations directed to the least informative domains (`r report(rope_proportion_scenario, strategy = "Serial Search", scenario = "1", comparison = "d12_34")`). This pattern stops when we reach scenario C, where the proportion of fixations towards domain 1 still is larger than to domain 3 (`r report(rope_proportion_scenario, strategy = "Serial Search", scenario = "2", comparison = "d1_3")`), which repeats again in scenario D (`r report(rope_proportion_scenario, strategy = "Serial Search", scenario = "3", comparison = "d1_3")`). This suggest that the amount of sampling only equalizes for the two most important domains, and does not occur as consistently for the scenarios where the best discriminating domain is located further down in the scale, more consistent with an incomplete use of the domains. Finally, the analysis of last fixations only the comparison between the 1st and 2nd most important domain shows a meaningful difference, favoring the latter (`r report(rope_last, strategy = "Serial Search", comparison = "d1_2")`). When looking across scenarios, this benchmark shows a preference for the most important domain in scenario A (`r report(rope_last_scenario, strategy = "Serial Search", scenario = "0")`), while in scenaro B we can see a tendency favoring the 2nd most important domain, but still overlapping slightly with the ROPE (`r report(rope_last_scenario, strategy = "Serial Search", scenario = "1")`). Both scenario C and D do not show a meaningful difference towards the domain 3 and 4, respectively.
+
+### Tallying
+This strategy integrates the sum of all the attributes as a single predictor. This makes all the domain equal in terms of the importance of its information, selecting the cue with more favorable features. Considering this, we should see no difference between the allocation of fixations to the different domains, reflecting an equal consideration of all of them by the participants. Moreover, the sampling should remain pretty much the same across decision scenarios, since these conditions should bear no effect in how much information they need to make their choices.
+
+We can see that the starting point (figure \@ref(fig:first-comparisons), panel D) does not seem to be allocated to any of the domains in particular. However, there is a trend favoring the most informative domain compared to the 2nd (`r report(rope_first, strategy = "Tallying", comparison = "d1_2")`), 3rd (`r report(rope_first, strategy = "Tallying", comparison = "d1_3")`), and 4th (`r report(rope_first, strategy = "Tallying", comparison = "d1_4")`), but the uncertainty associated to its estimate does not allow us to mark it as meaningful. Looking at this metric across decision scenarios does not show any disruption in the general pattern observed previously (figure \@ref(fig:first-scenario-comparisons-B)). Additionally, the overall allocation of fixations does not seem to lean towards any of the domains in particular (figure \@ref(fig:proportion-comparisons)). However, when we analyze these comparisons across decision scenarios, we can see a meaningful difference between the allocation of fixations to domain 1 and 4 in scenario A, favoring the latter (`r report(rope_proportion_scenario, strategy = "Tallying", scenario = "0", comparison = "d1_4")`). This does indicate at least a distinction between the most informative and least informative domains from the participants classified in this group by the choice model. This observation is reinforced by the results on their stopping point, showing a meaningful difference which favors domain 1 when compared to domain 4 (`r report(rope_last, strategy = "Tallying", comparison = "d1_4")`). Furthermore, the analysis of the location of last fixation in the decision scenarios shows a meaningful difference that favors the most informative domain over the 2nd (`r report(rope_last_scenario, strategy = "Tallying", scenario = "0", comparison = "d1_2")`), 3rd (`r report(rope_last_scenario, strategy = "Tallying", scenario = "0", comparison = "d1_3")`), and 4th (`r report(rope_last_scenario, strategy = "Tallying", scenario = "0", comparison = "d1_4")`) domains in scenario A.
+
+### Partial Tallying
+The last strategy we analyze in detail, only differs from its more compensatory parent in the number of domains added up to determine the cue with more positive attributes. In this particular case, the participants classified in this group only integrate the 1st and 2nd most important domains, therefore identifying explicitly these two as superior sources of information compared to the rest of the domains. Still, these two domains share the same level in the hierarchy, making both equally important to determine their choice. This small differentiation makes a some different predictions for some of the fixation metrics that we review. Overall, we should see a preference for these two domains in all the metrics when compared to the least informative domains, but we should see no difference between the 1st and 2nd domain, given its equal subjective importance.
+
+For the starting point, we can see that this strategy does not show the expected pattern of favoring the most important domains over the least important ones (figure \@ref(fig:first-comparisons), panel E; `r report(rope_first, strategy = "Partial Tallying", comparison = "d12_34")`). The different scenarios do not make these comparisons change in a meaningful way (figure \@ref(fig:first-scenario-comparisons-C)). The overall proportion of fixations for this strategy (figure \@ref(fig:proportion-comparisons), panel E) does show the predicted preference towards the most important domains (`r report(rope_proportion, strategy = "Partial Tallying", comparison = "d12_34")`), while there is no meaningful difference between domain 1 and 2 (`r report(rope_proportion, strategy = "Partial Tallying", comparison = "d1_2")`), and domains 3 and 4 (`r report(rope_proportion, strategy = "Partial Tallying", comparison = "d3_4")`). This pattern only holds for scenario A (`r report(rope_proportion_scenario, strategy = "Partial Tallying", comparison = "d12_34", scenario = "0")`) and B (`r report(rope_proportion_scenario, strategy = "Partial Tallying", comparison = "d12_34", scenario = "1")`). Finally, the stopping point shows no preference towards the most important domains (figure \@ref(fig:last-comparisons), panel E; `r report(rope_last, strategy = "Partial Tallying", comparison = "d12_34")`), and only shows a tendency favoring them in scenario A (`r report(rope_last_scenario, strategy = "Partial Tallying", comparison = "d12_34", scenario = "0")`). 
+
+# Discussion
+
+Just some notes:
+
+
+[@juslinPROBabilitiesEXemplarsPROBEX2002] there is a lot of cognitive resources invested in determining the ranking of the information.
+
+Review from [@broderChallengingCommonBeliefs2008]
+
+
+# References
+
+\begingroup
+\setlength{\parindent}{-0.5in}
+\setlength{\leftskip}{0.5in}
+
+<div id="refs" custom-style="Bibliography"></div>
+\endgroup
+
+# Figures and Tables
+
+<!-- Basic information -->
+
+```{r stimulus, fig.cap = "Sample stimulus presented to participants.", echo=FALSE, warning=F, message=F}
+knitr::include_graphics(file.path(folder_figures, "Z_stimulus.png"))
+
+```
+
+```{r weights, fig.cap = "Example of the organization of cue weights across domains during training and T1. All the equipment (domains) and brands (states) kept their position constant across subjects, but the allocation of weights was assigned semirandomly across them.", echo=FALSE, warning=F, message=F}
+knitr::include_graphics(file.path(folder_figures, "Z_weights_normal.png"))
+
+```
+
+```{r weights-equal, fig.cap = "Example of the organization of cue weights across domains during T2 in 0. All the different pairs had the same contingencies, preserving winning states.", echo=FALSE, warning=F, message=F}
+knitr::include_graphics(file.path(folder_figures, "Z_weights_equal.png"))
+
+```
+
+```{r weights-inverted, fig.cap = "Example of the organization of cue weights across domains during T2 in 1. The different domains show now inverted contingencies, preserving winning states.", echo=FALSE, warning=F, message=F}
+knitr::include_graphics(file.path(folder_figures, "Z_weights_inverted.png"))
+
+```
+
+```{r decision-models, fig.cap = "Information usage in the different decision models. In models 1-15, black circles indicate the domain(s) used by each strategy. For models 16-18 we created a model that integrated the domains in a single piece of information (i.e. a sum of positive traits). Models 19-21 consider a Serial Search for information, starting in the most informative domain, continuing in descending order of importance, and stoping as soon as any of these domains discriminates between cues.", echo=FALSE, warning=F, message=F}
+knitr::include_graphics(file.path(folder_figures, "Z_decision_models.png"))
+
+```
+
+```{r scenarios, fig.cap = "Decision scenarios according to the best discriminating domain between cues.", echo=FALSE, warning=F, message=F}
+knitr::include_graphics(file.path(folder_figures, "Z_scenarios.png"))
+
+```
+
+<!-- Results -->
+<!-- Model Classification -->
+```{r classification, fig.cap = "Strategy group classification based on the variational Bayesian inference.", echo=FALSE, warning=F, message=F}
+knitr::include_graphics(file.path(folder_figures, "A1_model_histogram.png"))
+
+```
+
+```{r classification-reduced, fig.cap = "Decision groups studied in detail for this work.", echo=FALSE, warning=F, message=F}
+knitr::include_graphics(file.path(folder_figures, "A2_model_histogram.png"))
+```
+
+
+<!-- Performance -->
+```{r performance, fig.cap = "Performance (as percent of accurate trials) across testing phases. Individual dots correspond to the median from the posterior draws from each participant. Error bars represent standard deviations.", echo=FALSE, message=FALSE, warning=FALSE}
+knitr::include_graphics(file.path(folder_figures, "B1_performance.png"))
+```
+
+```{r table-performance-change, results='asis', echo=F}
+apa_table(rope_performance_change, caption = "Accuracy between phases across groups", longtable = T)
+```
+
+```{r table-performance-group-diff, results='asis', echo=F}
+apa_table(rope_performance_group_diff, caption = "Paired comparisons between groups on the difference in performance across phases", longtable = T)
+```
+
+```{r table-performance-T1, results='asis', echo=F}
+apa_table(rope_performance_T1, caption = "Paired comparisons between groups on the performance in T1", longtable = T)
+```
+
+
+<!-- First fixation -->
+```{r first, fig.cap = "Allocation of first fixations across domains in T1. Individual dots correspond to the median from the posterior draws from each participant. Error bars represent standard deviations.", echo=FALSE, message=FALSE, warning=FALSE}
+knitr::include_graphics(file.path(folder_figures, "C1_first.png"))
+```
+
+```{r first-scenario, fig.cap = "Allocation of first fixations across domains in the different decision scenarios in T1. Individual dots correspond to the median from the posterior draws from each participant. Error bars represent standard deviations.", echo=FALSE, message=FALSE, warning=FALSE}
+knitr::include_graphics(file.path(folder_figures, "C2_first_scenario.png"))
+```
+
+```{r table-first, results='asis', echo=F}
+apa_table(rope_first, caption = "Follow up comparisons for the proportion of first fixations across decision scenarios.", longtable = T)
+```
+
+```{r table-first-scenario, results='asis', echo=F}
+apa_table(rope_first_scenario, caption = "Follow up comparisons for the proportion of first fixations.", longtable = T) 
+```
+
+
+<!-- Proportion -->
+```{r proportion, fig.cap = "Allocation of fixations across domains in T1 for the different decision groups. Individual dots correspond to the median from the posterior draws from each participant. Error bars represent standard deviations.", echo=FALSE, message=FALSE, warning=FALSE}
+knitr::include_graphics(file.path(folder_figures, "D1_proportion.png"))
+```
+
+```{r proportion-scenario, fig.cap = "Allocation of fixations across domains in T1 for the different decision groups. Individual dots correspond to the median from the posterior draws from each participant. Error bars represent standard deviations.", echo=FALSE, message=FALSE, warning=FALSE}
+knitr::include_graphics(file.path(folder_figures, "D2_proportion_scenario.png"))
+```
+
+```{r table-proportion, results='asis', echo=F}
+apa_table(rope_proportion, caption = "Follow up comparisons for the proportion of fixations.", longtable = T) 
+```
+
+```{r table-proportion-scenario, results='asis', echo=F}
+apa_table(rope_proportion_scenario, caption = "Follow up comparisons for the proportion of fixations across decision scenarios.", longtable = T) 
+```
+
+
+<!-- Last Fixation -->
+```{r last, fig.cap = "Allocation of the last fixations across domains in T1. Individual dots correspond to the median from the posterior draws from each participant. Error bars represent standard deviations.", echo=FALSE, message=FALSE, warning=FALSE}
+knitr::include_graphics(file.path(folder_figures, "E1_last.png"))
+```
+
+```{r last-scenario, fig.cap = "Allocation of last fixations across domains in the different decision scenarios in T1. Individual dots correspond to the median from the posterior draws from each participant. Error bars represent standard deviations.", echo=FALSE, message=FALSE, warning=FALSE}
+knitr::include_graphics(file.path(folder_figures, "E2_last_scenario.png"))
+```
+
+```{r table-last, results='asis', echo=F}
+apa_table(rope_last, caption = "Follow up comparisons for the last fixations.", longtable = T) 
+```
+
+```{r table-last-scenario, results='asis', echo=F}
+apa_table(rope_last_scenario, caption = "Follow up comparisons for the proportion of last fixations.", longtable = T) 
+```
+
