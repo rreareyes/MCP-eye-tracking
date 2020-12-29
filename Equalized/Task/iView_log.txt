@@ -1,0 +1,7 @@
+9352 00001.584   ERROR     !ticket carries8.47627e+006	End of Log file
+RROR     !set high performance mode failed
+1444 00003.808   ERROR     !profile does not exist
+1444 00003.808   ERROR     Error: parent profile not found: Default, profile could not be reseted
+1444 00003.808   ERROR     !profile exist, needs to be updated, remove and create
+1444 00003.808   ERROR     !profile will be created
+9352 00046.307   ERROR     !ticket carries no result
