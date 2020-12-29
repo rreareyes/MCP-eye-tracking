@@ -1,0 +1,589 @@
+---
+title: "Decision Simulator"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(ggplot2)
+library(ggforce)
+
+folder_root <- "C:/Users/rerr_/Google Drive/Graduate/Lab/Studies/MultiCue_Probabilistic/three_phases/INV/Analysis"
+
+folder_scripts      <- file.path(folder_root, "Scripts")
+folder_results      <- file.path(folder_root, "Results")
+folder_behavior     <- file.path(folder_root, "Behavior", "Results")
+folder_demographics <- file.path(folder_root, "Demographics_scales")
+folder_documents    <- file.path(folder_root, "Documents")
+folder_figures      <- file.path(folder_documents, "Tables and Figures")
+
+```
+
+```{r base-data}
+
+reference_dataset <- read.csv(file      = file.path(folder_behavior, 
+                                                    "behavior_dataset.csv"), 
+                              header    = T, 
+                              row.names = NULL) %>% 
+  filter(id == 520) %>% 
+  mutate(c1_left = replace(c1_left, c1_left == 2, 0)) %>% 
+  mutate(c2_left = replace(c2_left, c2_left == 2, 0)) %>% 
+  mutate(c3_left = replace(c3_left, c3_left == 2, 0)) %>% 
+  mutate(c4_left = replace(c4_left, c4_left == 2, 0)) %>% 
+  
+  mutate(c1_right = replace(c1_right, c1_right == 2, 0)) %>% 
+  mutate(c2_right = replace(c2_right, c2_right == 2, 0)) %>% 
+  mutate(c3_right = replace(c3_right, c3_right == 2, 0)) %>% 
+  mutate(c4_right = replace(c4_right, c4_right == 2, 0)) %>% 
+  
+  mutate(c1 = c1_left - c1_right,
+         c2 = c2_left - c2_right,
+         c3 = c3_left - c3_right,
+         c4 = c4_left - c4_right) %>% 
+  
+    select(id, phase, c1, c2, c3, c4)
+
+```
+
+```{r simulation-functions}
+
+simulate_scenario <- function(trials, w1, w2, w3, w4, s1, s2, s3, s4){
+  
+  data <- trials %>% 
+    mutate(weight1 = 0, weight2 = 0, weight3 = 0, weight4 = 0,
+           learned1 = 0, learned2= 0, learned3 = 0, learned4 = 0) %>% 
+    
+    mutate(weight1 = replace(weight1, c1 > 0 & phase != 3, w1 - (1-w1) )) %>% 
+    mutate(weight2 = replace(weight2, c2 > 0 & phase != 3, w2 - (1-w2) )) %>% 
+    mutate(weight3 = replace(weight3, c3 > 0 & phase != 3, w3 - (1-w3) )) %>% 
+    mutate(weight4 = replace(weight4, c4 > 0 & phase != 3, w4 - (1-w4) )) %>% 
+    
+    mutate(weight1 = replace(weight1, c1 < 0 & phase != 3, (1-w1) - w1)) %>% 
+    mutate(weight2 = replace(weight2, c2 < 0 & phase != 3, (1-w2) - w2)) %>% 
+    mutate(weight3 = replace(weight3, c3 < 0 & phase != 3, (1-w3) - w3)) %>% 
+    mutate(weight4 = replace(weight4, c4 < 0 & phase != 3, (1-w4) - w4)) %>% 
+    
+    mutate(weight1 = replace(weight1, c1 > 0 & phase == 3, s1 - (1-s1) )) %>% 
+    mutate(weight2 = replace(weight2, c2 > 0 & phase == 3, s2 - (1-s2) )) %>% 
+    mutate(weight3 = replace(weight3, c3 > 0 & phase == 3, s3 - (1-s3) )) %>% 
+    mutate(weight4 = replace(weight4, c4 > 0 & phase == 3, s4 - (1-s4) )) %>% 
+    
+    mutate(weight1 = replace(weight1, c1 < 0 & phase == 3, (1-s1) - s1)) %>% 
+    mutate(weight2 = replace(weight2, c2 < 0 & phase == 3, (1-s2) - s2)) %>% 
+    mutate(weight3 = replace(weight3, c3 < 0 & phase == 3, (1-s3) - s3)) %>% 
+    mutate(weight4 = replace(weight4, c4 < 0 & phase == 3, (1-s4) - s4)) %>% 
+    
+    mutate(learned1 = replace(learned1, c1 > 0, w1 - (1-w1) )) %>% 
+    mutate(learned2 = replace(learned2, c2 > 0, w2 - (1-w2) )) %>% 
+    mutate(learned3 = replace(learned3, c3 > 0, w3 - (1-w3) )) %>% 
+    mutate(learned4 = replace(learned4, c4 > 0, w4 - (1-w4) )) %>% 
+    
+    mutate(learned1 = replace(learned1, c1 < 0, (1-w1) - w1)) %>% 
+    mutate(learned2 = replace(learned2, c2 < 0, (1-w2) - w2)) %>% 
+    mutate(learned3 = replace(learned3, c3 < 0, (1-w3) - w3)) %>% 
+    mutate(learned4 = replace(learned4, c4 < 0, (1-w4) - w4)) %>% 
+    
+    mutate(evidence = round(rowSums(.[7:10]), 5)) %>% 
+    
+    mutate(fake_response = 0) %>% 
+    mutate(correct = 0) %>% 
+    
+    filter(evidence != 0)
+  
+}
+
+simulate_decision <- function(data, model, n_simulations, error_rate = 0.15){
+  
+  result <- list()
+
+  for (iSample in 1:n_simulations) {
+    
+    if (model == "TTB") {
+      
+      sim_data <- data %>% 
+        # Create a vector of random responses, which will fill the decision scenarios 
+        # where the rule can't make a decision
+        mutate(fake_response = sample(x = 0:1, size = length(data$fake_response), replace = T)) %>%
+        
+        # Assign the different responses according to the decision scenario and the rule
+        mutate(fake_response = replace(fake_response, 
+                                       c1 > 0, 
+                                       sample(x       = c(0, 1), 
+                                              size    = 1, 
+                                              prob    = c(error_rate, 1 - error_rate), 
+                                              replace = T))) %>% 
+        
+        mutate(fake_response = replace(fake_response, 
+                                       c1 < 0, 
+                                       sample(x       = c(0, 1), 
+                                              size    = 1, 
+                                              prob    = c(1 - error_rate, error_rate), 
+                                              replace = T))) %>% 
+        
+        mutate(fake_response = replace(fake_response, 
+                                       c1 == 0 & c2 > 0, 
+                                       sample(x       = c(0, 1), 
+                                              size    = 1, 
+                                              prob    = c(error_rate, 1 - error_rate), 
+                                              replace = T))) %>% 
+        
+        mutate(fake_response = replace(fake_response, 
+                                       c1 == 0 & c2 < 0, 
+                                       sample(x       = c(0, 1), 
+                                              size    = 1, 
+                                              prob    = c(1 - error_rate, error_rate), 
+                                              replace = T))) %>% 
+        
+        mutate(fake_response = replace(fake_response,
+                                       c1 == 0 & c2 == 0 & c3 > 0, 
+                                       sample(x       = c(0, 1), 
+                                              size    = 1, 
+                                              prob    = c(error_rate, 1 - error_rate), 
+                                              replace = T))) %>% 
+        
+        mutate(fake_response = replace(fake_response, 
+                                       c1 == 0 & c2 == 0 & c3 < 0, 
+                                       sample(x       = c(0, 1), 
+                                              size    = 1, 
+                                              prob    = c(1 - error_rate, error_rate), 
+                                              replace = T))) %>%
+        
+        mutate(fake_response = replace(fake_response, 
+                                       c1 == 0 & c2 == 0 & c3 == 0 & c4 > 0, 
+                                       sample(x       = c(0, 1), 
+                                              size    = 1, 
+                                              prob    = c(error_rate, 1 - error_rate), 
+                                              replace = T))) %>% 
+        
+        mutate(fake_response = replace(fake_response, 
+                                       c1 == 0 & c2 == 0 & c3 == 0 & c4 < 0, 
+                                       sample(x       = c(0, 1), 
+                                              size    = 1, 
+                                              prob    = c(1 - error_rate, error_rate), 
+                                              replace = T))) 
+
+    }
+    
+    if (model == "DTW1"){
+      
+      sim_data <- data %>%
+        # Create a vector of random responses, which will fill the decision scenarios 
+        # where the rule can't make a decision
+        mutate(fake_response = sample(x = 0:1, size = length(data$fake_response), replace = T)) %>%
+
+        # Assign the different responses according to the decision scenario and the rule
+        mutate(fake_response = replace(fake_response, 
+                                       c1 > 0, 
+                                       sample(x       = c(0, 1), 
+                                              size    = 1, 
+                                              prob    = c(error_rate, 1 - error_rate), 
+                                              replace = T))) %>% 
+        
+        mutate(fake_response = replace(fake_response, 
+                                       c1 < 0, 
+                                       sample(x       = c(0, 1), 
+                                              size    = 1, 
+                                              prob    = c(1 - error_rate, error_rate), 
+                                              replace = T))) %>% 
+        
+        mutate(fake_response = replace(fake_response, 
+                                       c1 == 0 & c2 > 0, 
+                                       sample(x       = c(0, 1), 
+                                              size    = 1, 
+                                              prob    = c(error_rate, 1 - error_rate), 
+                                              replace = T))) %>% 
+        
+        mutate(fake_response = replace(fake_response, 
+                                       c1 == 0 & c2 < 0, 
+                                       sample(x       = c(0, 1), 
+                                              size    = 1, 
+                                              prob    = c(1 - error_rate, error_rate), 
+                                              replace = T))) %>% 
+        
+        mutate(fake_response = replace(fake_response, 
+                                       c1 == 0 & c2 == 0 & c3 > 0, 
+                                       sample(x       = c(0, 1), 
+                                              size    = 1, 
+                                              prob    = c(error_rate, 1 - error_rate), 
+                                              replace = T))) %>% 
+        
+        mutate(fake_response = replace(fake_response, 
+                                       c1 == 0 & c2 == 0 & c3 < 0, 
+                                       sample(x       = c(0, 1), 
+                                              size    = 1, 
+                                              prob    = c(1 - error_rate, error_rate), 
+                                              replace = T))) 
+      
+    }
+    
+    
+    if (model == "DTW2"){
+      
+      sim_data <- data %>%
+        # Create a vector of random responses, which will fill the decision scenarios 
+        # where the rule can't make a decision
+        mutate(fake_response = sample(x = 0:1, size = length(data$fake_response), replace = T)) %>%
+        
+        # Assign the different responses according to the decision scenario and the rule
+        mutate(fake_response = replace(fake_response, 
+                                       c1 > 0, 
+                                       sample(x       = c(0, 1), 
+                                              size    = 1, 
+                                              prob    = c(error_rate, 1 - error_rate), 
+                                              replace = T))) %>%
+        
+        mutate(fake_response = replace(fake_response, 
+                                       c1 < 0, 
+                                       sample(x       = c(0, 1), 
+                                              size    = 1, 
+                                              prob    = c(1 - error_rate, error_rate), 
+                                              replace = T))) %>% 
+        
+        mutate(fake_response = replace(fake_response, 
+                                       c1 == 0 & c2 > 0, 
+                                       sample(x       = c(0, 1), 
+                                              size    = 1, 
+                                              prob    = c(error_rate, 1 - error_rate), 
+                                              replace = T))) %>% 
+        
+        mutate(fake_response = replace(fake_response, 
+                                       c1 == 0 & c2 < 0, 
+                                       sample(x       = c(0, 1), 
+                                              size    = 1, 
+                                              prob    = c(1 - error_rate, error_rate), 
+                                              replace = T))) 
+      
+    }
+    
+    
+    if (model == "Franklin"){
+      
+      sim_data <- data %>%
+        # Create a vector of random responses, which will fill the decision scenarios 
+        # where the rule can't make a decision
+        mutate(fake_response = sample(x = 0:1, size = length(data$fake_response), replace = T)) %>%
+        
+        # Assign the different responses according to the decision scenario and the rule
+        mutate(fake_response = replace(fake_response, 
+                                       rowSums(.[11:14]) > 0, 
+                                       sample(x       = c(0, 1), 
+                                              size    = 1, 
+                                              prob    = c(error_rate, 1 - error_rate), 
+                                              replace = T))) %>% 
+        
+        mutate(fake_response = replace(fake_response, 
+                                       rowSums(.[11:14]) < 0, 
+                                       sample(x       = c(0, 1), 
+                                              size    = 1, 
+                                              prob    = c(1 - error_rate, error_rate), 
+                                              replace = T)))
+    }
+
+  
+    if (model == "Dawes"){
+      
+      sim_data <- data %>%
+        # Create a vector of random responses, which will fill the decision scenarios 
+        # where the rule can't make a decision
+        mutate(fake_response = sample(x = 0:1, size = length(data$fake_response), replace = T)) %>%
+        
+        # Assign the different responses according to the decision scenario and the rule
+        mutate(fake_response = replace(fake_response, 
+                                       rowSums(.[3:6]) > 0, 
+                                       sample(x       = c(0, 1), 
+                                              size    = 1, 
+                                              prob    = c(error_rate, 1 - error_rate), 
+                                              replace = T))) %>% 
+        
+        mutate(fake_response = replace(fake_response, 
+                                       rowSums(.[3:6]) < 0, 
+                                       sample(x       = c(0, 1), 
+                                              size    = 1, 
+                                              prob    = c(1 - error_rate, error_rate), 
+                                              replace = T)))
+    }
+    
+    sim_data$correct[sim_data$evidence > 0 & sim_data$fake_response == 1] <- 1
+    sim_data$correct[sim_data$evidence < 0 & sim_data$fake_response == 0] <- 1
+    
+    sim_data <- sim_data %>% 
+      group_by(phase) %>% 
+      summarise(accuracy = mean(correct)) %>% 
+      ungroup()
+    
+    result[[iSample]] <- sim_data
+  
+  } #end simulation loop
+  
+  merged <- do.call("rbind", result)
+  
+} #end function
+
+
+```
+
+```{r generate-datasets}
+
+decision_scenario_current <- simulate_scenario(reference_dataset,
+                                               w1 = 0.95, w2 = 0.80, w3 = 0.65, w4 = 0.50,
+                                               s1 = 0.80, s2 = 0.80, s3 = 0.80, s4 = 0.80)
+
+decision_scenario_hard_shift <- simulate_scenario(reference_dataset,
+                                               w1 = 0.95, w2 = 0.80, w3 = 0.65, w4 = 0.50,
+                                               s1 = 0.65, s2 = 0.65, s3 = 0.65, s4 = 0.65)
+
+decision_scenario_hannah <- simulate_scenario(reference_dataset,
+                                               w1 = 0.90, w2 = 0.80, w3 = 0.70, w4 = 0.60,
+                                               s1 = 0.80, s2 = 0.80, s3 = 0.80, s4 = 0.80)
+
+decision_scenario_close <- simulate_scenario(reference_dataset,
+                                               w1 = 0.95, w2 = 0.80, w3 = 0.65, w4 = 0.50,
+                                               s1 = 0.95, s2 = 0.95, s3 = 0.95, s4 = 0.95)
+
+decision_scenario_inverted <- simulate_scenario(reference_dataset,
+                                               w1 = 0.95, w2 = 0.80, w3 = 0.65, w4 = 0.50,
+                                               s1 = 0.50, s2 = 0.65, s3 = 0.80, s4 = 0.95)
+```
+
+```{r run-simulations, message=F}
+
+ttb_data <- simulate_decision(decision_scenario_current,
+                              model = "TTB", 
+                              n_simulations = 1000, 
+                              error_rate = 0.15) %>% 
+  mutate(model = "TTB")
+
+dtw_data <- simulate_decision(decision_scenario_current,
+                              model = "DTW2",
+                              n_simulations = 1000, 
+                              error_rate = 0.15) %>% 
+  mutate(model = "DTW")
+
+franklin_data <- simulate_decision(decision_scenario_current,
+                              model = "Franklin", 
+                              n_simulations = 1000, 
+                              error_rate = 0.15) %>% 
+  mutate(model = "Franklin")
+
+dawes_data <- simulate_decision(decision_scenario_current,
+                              model = "Dawes", 
+                              n_simulations = 1000, 
+                              error_rate = 0.15) %>% 
+  mutate(model = "Dawes")
+
+
+model_results_normal <- full_join(ttb_data, dtw_data) %>% 
+  full_join(franklin_data) %>% 
+  full_join(dawes_data) %>% 
+  group_by(model, phase) %>% 
+  mutate(mean_accuracy = mean(accuracy)) %>% 
+  ungroup()
+
+
+###
+
+ttb_data_hard <- simulate_decision(decision_scenario_inverted,
+                              model = "TTB", 
+                              n_simulations = 1000, 
+                              error_rate = 0.15) %>% 
+  mutate(model = "TTB")
+
+dtw_data_hard <- simulate_decision(decision_scenario_inverted,
+                              model = "DTW2",
+                              n_simulations = 1000, 
+                              error_rate = 0.15) %>% 
+  mutate(model = "DTW")
+
+franklin_data_hard <- simulate_decision(decision_scenario_inverted,
+                              model = "Franklin", 
+                              n_simulations = 1000, 
+                              error_rate = 0.15) %>% 
+  mutate(model = "Franklin")
+
+dawes_data_hard <- simulate_decision(decision_scenario_inverted,
+                              model = "Dawes", 
+                              n_simulations = 1000, 
+                              error_rate = 0.15) %>% 
+  mutate(model = "Dawes")
+
+
+model_results_hard <- full_join(ttb_data_hard, dtw_data_hard) %>% 
+  full_join(franklin_data_hard) %>% 
+  full_join(dawes_data_hard) %>% 
+  group_by(model, phase) %>% 
+  mutate(mean_accuracy = mean(accuracy)) %>% 
+  ungroup()
+
+
+###
+
+ttb_data_hannah <- simulate_decision(decision_scenario_hannah,
+                              model = "TTB", 
+                              n_simulations = 1000, 
+                              error_rate = 0.15) %>% 
+  mutate(model = "TTB")
+
+dtw_data_hannah <- simulate_decision(decision_scenario_hannah,
+                              model = "DTW2",
+                              n_simulations = 1000, 
+                              error_rate = 0.15) %>% 
+  mutate(model = "DTW")
+
+franklin_data_hannah<- simulate_decision(decision_scenario_hannah,
+                              model = "Franklin", 
+                              n_simulations = 1000, 
+                              error_rate = 0.15) %>% 
+  mutate(model = "Franklin")
+
+dawes_data_hannah <- simulate_decision(decision_scenario_hannah,
+                              model = "Dawes", 
+                              n_simulations = 1000, 
+                              error_rate = 0.15) %>% 
+  mutate(model = "Dawes")
+
+
+model_results_hannah <- full_join(ttb_data_hannah, dtw_data_hannah) %>% 
+  full_join(franklin_data_hannah) %>% 
+  full_join(dawes_data_hannah) %>% 
+  group_by(model, phase) %>% 
+  mutate(mean_accuracy = mean(accuracy)) %>% 
+  ungroup()
+
+
+
+###
+
+ttb_data_close  <- simulate_decision(decision_scenario_close ,
+                              model = "TTB", 
+                              n_simulations = 1000, 
+                              error_rate = 0.15) %>% 
+  mutate(model = "TTB")
+
+dtw_data_close  <- simulate_decision(decision_scenario_close ,
+                              model = "DTW2",
+                              n_simulations = 1000, 
+                              error_rate = 0.15) %>% 
+  mutate(model = "DTW")
+
+franklin_data_close  <- simulate_decision(decision_scenario_close ,
+                              model = "Franklin", 
+                              n_simulations = 1000, 
+                              error_rate = 0.15) %>% 
+  mutate(model = "Franklin")
+
+dawes_data_close  <- simulate_decision(decision_scenario_close ,
+                              model = "Dawes", 
+                              n_simulations = 1000, 
+                              error_rate = 0.15) %>% 
+  mutate(model = "Dawes")
+
+
+model_results_close <- full_join(ttb_data_close, dtw_data_close) %>% 
+  full_join(franklin_data_close) %>% 
+  full_join(dawes_data_close) %>% 
+  group_by(model, phase) %>% 
+  mutate(mean_accuracy = mean(accuracy)) %>% 
+  ungroup()
+
+
+
+
+
+```
+
+
+```{r plot-results, echo = FALSE, warning=F, message=F}
+ggplot(model_results_normal,
+       aes(x = phase)) +
+  
+  geom_smooth(aes(y = accuracy,
+                color = model,
+                fill = model,
+                group = model), method = "loess") +
+  
+  scale_x_continuous(name = "Phase", breaks = seq(from = 1,
+                                                  to = 3,
+                                                  by = 1)) +
+  
+  scale_y_continuous(name = "Expected Accuracy", limits = c(0.5, 1)) +
+  
+  scale_fill_discrete(name = "Decision Model") +
+  
+  scale_color_discrete(name = "Decision Model") +
+  
+  labs(title = "Current decision scenario")
+
+
+ggplot(model_results_hannah,
+       aes(x = phase)) +
+  
+  geom_smooth(aes(y = accuracy,
+                color = model,
+                fill = model,
+                group = model), method = "loess") +
+  
+  scale_x_continuous(name = "Phase", breaks = seq(from = 1,
+                                                  to = 3,
+                                                  by = 1)) +
+  
+  scale_y_continuous(name = "Expected Accuracy", limits = c(0.5, 1)) +
+  
+  scale_fill_discrete(name = "Decision Model") +
+  
+  scale_color_discrete(name = "Decision Model") +
+  
+  labs(title = "Hannah's decision scenario + 0.80 shift")
+
+
+
+ggplot(model_results_hard,
+       aes(x = phase)) +
+  
+  geom_smooth(aes(y = accuracy,
+                color = model,
+                fill = model,
+                group = model), method = "loess") +
+  
+  scale_x_continuous(name = "Phase", breaks = seq(from = 1,
+                                                  to = 3,
+                                                  by = 1)) +
+  
+  scale_y_continuous(name = "Expected Accuracy", limits = c(0.5, 1)) +
+  
+  scale_fill_discrete(name = "Decision Model") +
+  
+  scale_color_discrete(name = "Decision Model") +
+  
+  labs(title = "Current decision scenario + inverted")
+
+
+
+ggplot(model_results_close,
+       aes(x = phase)) +
+  
+  geom_smooth(aes(y = accuracy,
+                color = model,
+                fill = model,
+                group = model), method = "loess") +
+  
+  scale_x_continuous(name = "Phase", breaks = seq(from = 1,
+                                                  to = 3,
+                                                  by = 1)) +
+  
+  scale_y_continuous(name = "Expected Accuracy", limits = c(0.5, 1)) +
+  
+  scale_fill_discrete(name = "Decision Model") +
+  
+  scale_color_discrete(name = "Decision Model") +
+  
+  labs(title = "Close contingencies + 0.65 shift")
+
+
+```
+
+
+
+
+
+
+

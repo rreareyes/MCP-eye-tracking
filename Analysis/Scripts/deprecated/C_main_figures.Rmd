@@ -1,0 +1,893 @@
+---
+output: pdf_document
+classoption: landscape
+---
+
+```{r setup, include = FALSE}
+if(!"tidyverse" %in% rownames(installed.packages())) install.packages("tidyverse")
+if(!"ggplot2" %in% rownames(installed.packages())) install.packages("ggplot2")
+if(!"cowplot" %in% rownames(installed.packages())) install.packages("cowplot")
+if(!"ggforce" %in% rownames(installed.packages())) install.packages("ggforce")
+if(!"lemon" %in% rownames(installed.packages())) install.packages("lemon")
+if(!"ggridges" %in% rownames(installed.packages())) install.packages("ggridges")
+
+library(tidyverse)
+library(ggplot2)
+library(cowplot)
+library(ggforce)
+library(lemon)
+library(ggridges)
+library(tidybayes)
+library(kableExtra)
+library(papaja)
+
+```
+
+\pagenumbering{gobble}
+
+```{r base-paths, echo = F, warning=F}
+setwd("..")
+folder_root <- getwd()
+
+folder_references <- file.path(folder_root, "References")
+folder_documents  <- file.path(folder_root, "Documents")
+folder_scripts    <- file.path(folder_root, "Scripts")
+folder_results    <- file.path(folder_root, "Results", "Summaries")
+folder_figures    <- file.path(folder_root, "Figures")
+```
+
+```{r summaries, echo = F}
+load(file.path(folder_results, "basic_summaries.RData"))
+load(file.path(folder_results, "bayes_comparisons.RData"))
+load(file.path(folder_results, "bayes_intervals.RData"))
+load(file.path(folder_results, "bayes_rope.RData"))
+load(file.path(folder_results, "bayes_individual_means.RData"))
+
+```
+
+```{r loop-counters, echo = F}
+list_strategies = c("1st only", "2nd only", "Serial search", "Tallying", "Tallying Lazy")
+n_strategies = length(list_strategies)
+
+list_group_comparisons = unique(comp_performance_group_diff$comparison)
+n_group_comparisons = length(list_group_comparisons)
+
+list_domain_comparisons = unique(c(comp_last_scenario$comparison, comp_last$comparison))
+n_domain_comparisons = length(list_domain_comparisons)
+
+```
+
+```{r plot-labels, echo=F}
+labels_group <- c("1st\n only", "2nd\n only", "3rd\n only", "4th\n only", "1st &\n 3rd", "1st &\n 4th", "2nd &\n 4th", "3rd &\n 4th", "WADD", "Serial\n search", "Tallying", "Partial\n Tallying")
+
+names(labels_group) <- c("1st only", "2nd only", "3rd only", "4th only", "1st and 3rd", "1st and 4th", "2nd and 4th", "3rd and 4th", "WADD", "Serial search", "Tallying", "Tallying Lazy")
+
+labels_domain <- c("1st", "2nd", "3rd", "4th")
+names(labels_domain) <- c("1", "2", "3", "4")
+
+labels_phase <- c("TP", "T1", "T2")
+names(labels_phase) <- c("1", "2", "3")
+
+labels_experiment <- c("E1", "E2")
+names(labels_experiment) <- c("1", "2")
+
+labels_scenario <- c("Scenario A", "Scenario B", "Scenario C", "Scenario D")
+names(labels_scenario) <- c("A", "B", "C", "D")
+
+labels_group_comparisons <- c("First vs\n Second", "First vs\n Serial", "First vs\n Tally", "First vs\n Partial Tallying", "Second vs\n Serial",
+                     "Second vs\n Tallying", "Second vs\n Partial Tallying", "Serial vs\n Tallying", "Serial vs\n Partial Tallying", "Tallying vs\n Partial Tallying")
+names(labels_group_comparisons) <- list_group_comparisons
+
+labels_domain_comparisons <- c("D2 vs Others", "D1 vs D2", "D3 vs D4", "D1-2 vs D3-4", "D1 vs Others", "D3 vs Others", "D4 vs Others", "D1 vs D3", "D1 vs D4", "D2 vs D3", "D2 vs D4", "Linear 1", "Linear 2", "Linear 3")
+names(labels_domain_comparisons) <- list_domain_comparisons
+
+```
+
+```{r main-plots-settings, echo=F}
+
+#plot_colors <- c("steelblue", "seagreen4", "darkorchid", "goldenrod4", "turquoise4")
+
+plot_colors <- c("#5d0004", "#610006", "#7c0008", "#910009", "#a7000a")
+
+#plot_extended_colors <- c("steelblue", "seagreen4", "gray48", "gray30", "gray35", "gray40", "gray45",  "gray50", "gray55", "darkorchid", "goldenrod4", "turquoise4")
+
+plot_extended_colors <- c("#5d0004", "#610006", "gray48", "gray30", "gray35", "gray40", "gray45",  "gray50", "gray55", "#7c0008", "#910009", "#a7000a")
+
+layers_bars <- list(
+  
+  scale_y_continuous(name = "Subjects", breaks = seq(from = 0, to = 50, by   = 2)),
+
+  scale_x_discrete(name = "", labels = labels_group),
+
+  guides(color = F, fill = F, alpha = F)
+  
+  )
+
+theme_bars <- theme_bw() +
+  
+  theme(panel.border = element_blank(),
+        axis.line    = element_line(color = "#520005"),
+        axis.ticks.y = element_blank(),
+        axis.text    = element_text(color = "#520005", size = 10),
+        text         = element_text(color = "#3d0003", family = "Helvetica", size = 10),
+        axis.text.x  = element_text(color = "#520005", size = 8),
+        plot.title   = element_text(size = 18, hjust = 0.5, face = "bold"),
+        strip.background = element_rect(fill   = "#680001"),
+        strip.text       = element_text(color = "white", size = 10, face = "bold"),
+        panel.grid.major.x = element_line(color = "#520005"),
+        panel.grid.major.y = element_line(color = "#520005")) +
+  
+  background_grid(major = "y")
+
+
+
+layers_main <- list(
+  
+  geom_line(aes(y     = mean,
+                group = strategy),
+            position = position_dodge(0.8),
+            color    = "#520005",
+            size     = 1,
+            linetype = 1),
+
+  geom_errorbar(aes(ymin  = lower,
+                    ymax  = upper,
+                    group = strategy),
+              color    = "#520005",
+              position = position_dodge(0.8),
+              width    = 0.1,
+              size     = 0.8),
+  
+  guides(color = F, fill = F, alpha = F),
+  
+  scale_x_discrete(name = "", labels = labels_phase)
+
+  )
+
+theme_main <- theme_bw() +
+  
+  theme(panel.border = element_blank(),
+        axis.line    = element_line(color = "#520005"),
+        axis.ticks.y = element_blank(),
+        axis.text    = element_text(color = "#520005", size = 10),
+        text         = element_text(color = "#3d0003", family = "Helvetica", size = 10),
+        axis.text.x  = element_text(color = "#520005", size = 9),
+        plot.title   = element_text(size = 18, hjust = 0.5, face = "bold"),
+        strip.background = element_rect(fill   = "#680001"),
+        strip.text       = element_text(color = "white", size = 10, face = "bold"),
+        panel.grid.major.x = element_line(color = "#520005"),
+        panel.grid.major.y = element_line(color = "#520005")) +
+  
+  background_grid(major = "y")
+
+
+```
+
+
+```{r comparison-plots-settings, echo = F}
+
+theme_comparisons <- theme_bw() +
+  
+  theme(panel.border = element_blank(),
+        axis.line    = element_line(color = "#520005"),
+        axis.ticks.y = element_blank(),
+        axis.text    = element_text(color = "#520005", size = 10),
+        text         = element_text(color = "#3d0003", family = "Helvetica", size = 10),
+        axis.text.x  = element_text(color = "#520005", size = 9),
+        plot.title   = element_text(size = 18, hjust = 0.5, face = "bold"),
+        strip.background = element_rect(fill   = "#680001"),
+        strip.text       = element_text(color = "white", size = 10, face = "bold"),
+        panel.grid.major.x = element_line(color = "#520005"),
+        panel.grid.major.y = element_line(color = "#520005")) +
+  
+  background_grid(major = "x")
+
+layers_comparisons <- list(
+  
+  annotate(geom  = "rect",
+           xmin  = -0.1, xmax = 0.1,
+           ymin  = -Inf, ymax = Inf,
+           fill  = "#520005",
+           alpha = 0.25),
+  
+  stat_pointinterval(.width         = c(0.89),
+                     point_interval = median_hdi,
+                     position       = position_nudge(y = -150),
+                     color          = "#80001c",
+                     size           = 6),
+  
+  scale_y_continuous(name   = NULL,
+                     labels = NULL),
+  
+  scale_x_continuous(name = expression(paste("Standardized difference (", delta, ")")),
+                     labels = c(-3, -2.5, -2, -1.5, -1, -0.5, 0, 0.5, 1, 1.5, 2, 2.5, 3),
+                     breaks = c(-3, -2.5, -2, -1.5, -1, -0.5, 0, 0.5, 1, 1.5, 2, 2.5, 3)),
+
+  guides(color = F, fill = F, alpha = F)
+  
+  )
+
+
+```
+
+
+# MAIN FIGURES
+
+```{r model-selection, fig.align="center", echo=FALSE, message=FALSE, warning=FALSE, fig.height=6, fig.width=12}
+ggplot(data = filter(summary_strategy),
+       aes(x = as.factor(group))) +
+  
+  ggtitle("Subject Classification") +
+  
+  geom_bar(aes(fill = group),
+           color = "black",
+           alpha = 0.8) +
+  
+  scale_fill_manual(values = plot_extended_colors) +
+
+  layers_bars + 
+  
+  theme_bars +
+  
+  facet_rep_grid(cols     = vars(experiment),
+                 labeller = labeller(experiment = labels_experiment)) +
+
+ggsave(filename = file.path(folder_figures, "A1_model_histogram.png"))
+
+```
+\pagebreak
+
+```{r model-selection-less, fig.align="center", echo=FALSE, message=FALSE, warning=FALSE, fig.height=6, fig.width=10}
+ggplot(data = filter(summary_strategy, strategy %in% c(1, 2, 16:21)),
+       aes(x = as.factor(group))) +
+  
+  ggtitle("Subject Classification") +
+  
+  geom_bar(aes(fill = group),
+           color = "black",
+           alpha = 0.8) +
+  
+  facet_rep_grid(cols     = vars(experiment),
+                 labeller = labeller(case       = labels_scenario,
+                                     group      = labels_group,
+                                     phase      = labels_phase,
+                                     rank       = labels_domain,
+                                     experiment = labels_experiment)) +
+  
+  scale_y_continuous(name   = "Subjects",
+                     breaks = seq(from = 0,
+                                  to   = 50,
+                                  by   = 2)) +
+
+  scale_x_discrete(name   = "Strategy",
+                   labels = labels_group) +
+
+  guides(color = F, fill = F) +
+
+  scale_fill_manual(values = plot_colors) +
+  
+  scale_color_manual(values = plot_colors) +
+
+  theme_main
+
+ggsave(filename = file.path(folder_figures, "A2_model_histogram.png"))
+
+```
+\pagebreak
+
+```{r performance-change, fig.align="center", echo=FALSE, message=FALSE, warning=FALSE, fig.height=6, fig.width=10}
+ggplot(data = intervals_performance,
+       aes(x = phase)) +
+  
+  ggtitle("Posterior summary for accuracy") +
+  
+  geom_point(data = individual_performance,
+             aes(y     = percent,
+                 group = subject),
+             position = position_dodge(0.8),
+             color    = "#520005",
+             alpha    = 0.1,
+             size     = 1) +
+  
+  geom_line(data = individual_performance,
+            aes(y     = percent,
+                group = subject),
+            position = position_dodge(0.8),
+            color    = "#520005",
+            alpha    = 0.1,
+            linetype = 1) +
+  
+  layers_main +
+  
+  facet_rep_grid(cols = vars(strategy), 
+                 rows = vars(experiment),
+                 labeller = labeller(strategy = labels_group)) +
+  
+  scale_y_continuous(name   = "Proportion of correct trials",
+                     breaks = seq(from = 0,
+                                  to   = 1,
+                                  by   = 0.1)) +
+  
+  theme_main 
+  
+  ggsave(filename = file.path(folder_figures, "B1_performance.png"))
+
+```
+\pagebreak
+
+```{r first, fig.align="center", echo=FALSE, message=FALSE, warning=FALSE, fig.height=3, fig.width=10}
+ggplot(data = intervals_first,
+       aes(x = domain)) +
+  
+  ggtitle("Posterior summary for first fixation") +
+  
+  geom_point(data = individual_first,
+             aes(y     = percent,
+                 group = subject),
+             position = position_dodge(0.8),
+             color    = "#520005",
+             alpha    = 0.1,
+             size     = 1) +
+  
+  geom_line(data = individual_first,
+            aes(y     = percent,
+                group = subject),
+            position = position_dodge(0.8),
+            color    = "#520005",
+            alpha    = 0.1,
+            linetype = 1) +
+  
+  layers_main +
+  
+  facet_rep_grid(cols = vars(strategy),
+                 labeller = labeller(strategy = labels_group)) +
+  
+  scale_y_continuous(name   = "Proportion of fixations",
+                     breaks = seq(from = 0,
+                                  to   = 1,
+                                  by   = 0.1)) +
+  
+  scale_x_discrete(name = "Domain importance", 
+                   labels = c("1st", "2nd", "3rd", "4th")) +
+  
+  theme_main 
+  
+ggsave(filename = file.path(folder_figures, "C1_first.png"))
+
+```
+\pagebreak
+
+```{r first-scenario, fig.align="center", echo=FALSE, message=FALSE, warning=FALSE, fig.height=9, fig.width=10}
+ggplot(data = intervals_first_scenario,
+       aes(x = domain)) +
+  
+  ggtitle("Posterior summary for first fixations by scenario") +
+  
+  geom_point(data = individual_first_scenario,
+             aes(y     = percent,
+                 group = subject),
+             position = position_dodge(0.8),
+             color    = "#520005",
+             alpha    = 0.1,
+             size     = 1) +
+  
+  geom_line(data = individual_first_scenario,
+            aes(y     = percent,
+                group = subject),
+            position = position_dodge(0.8),
+            color    = "#520005",
+            alpha    = 0.1,
+            linetype = 1) +
+  
+  layers_main +
+  
+  facet_rep_grid(cols = vars(strategy),
+                 rows = vars(scenario),
+                 labeller = labeller(strategy = labels_group,
+                                     scenario = labels_scenario)) +
+  
+  scale_y_continuous(name   = "Proportion of fixations",
+                     breaks = seq(from = 0,
+                                  to   = 1,
+                                  by   = 0.1)) +
+  
+  scale_x_discrete(name = "Domain importance", 
+                   labels = c("1st", "2nd", "3rd", "4th")) +
+  
+  theme_main 
+  
+ggsave(filename = file.path(folder_figures, "C2_first_scenario.png"))
+
+```
+\pagebreak
+
+```{r proportion, fig.align="center", echo=FALSE, message=FALSE, warning=FALSE, fig.height=3, fig.width=10}
+ggplot(data = intervals_proportion,
+       aes(x = domain)) +
+  
+  ggtitle("Posterior predictions for proportion of fixations") +
+  
+  geom_point(data = individual_proportion,
+             aes(y     = percent,
+                 group = subject),
+             position = position_dodge(0.8),
+             color    = "#520005",
+             alpha    = 0.1,
+             size     = 1) +
+  
+  geom_line(data = individual_proportion,
+            aes(y     = percent,
+                group = subject),
+            position = position_dodge(0.8),
+            color    = "#520005",
+            alpha    = 0.1,
+            linetype = 1) +
+  
+  layers_main +
+  
+  facet_rep_grid(cols = vars(strategy),
+                 labeller = labeller(strategy = labels_group)) +
+  
+  scale_y_continuous(name   = "Proportion of fixations",
+                     breaks = seq(from = 0,
+                                  to   = 1,
+                                  by   = 0.1)) +
+  
+  scale_x_discrete(name = "Domain importance", 
+                   labels = c("1st", "2nd", "3rd", "4th")) +
+  
+    theme_main
+  
+ggsave(filename = file.path(folder_figures, "D1_proportion.png"))
+  
+
+```
+\pagebreak
+
+```{r proportion-scenario, fig.align="center", echo=FALSE, message=FALSE, warning=FALSE, fig.height=9, fig.width=10}
+ggplot(data = intervals_proportion_scenario,
+       aes(x = domain)) +
+  
+  ggtitle("Posterior summary for proportion of fixations by scenario") +
+  
+  geom_point(data = individual_proportion_scenario,
+             aes(y     = percent,
+                 group = subject),
+             position = position_dodge(0.8),
+             color    = "#520005",
+             alpha    = 0.1,
+             size     = 1) +
+  
+  geom_line(data = individual_proportion_scenario,
+            aes(y     = percent,
+                group = subject),
+            position = position_dodge(0.8),
+            color    = "#520005",
+            alpha    = 0.1,
+            linetype = 1) +
+  
+  layers_main +
+  
+  scale_y_continuous(name   = "Proportion of fixations",
+                     breaks = seq(from = 0,
+                                  to   = 1,
+                                  by   = 0.1)) +
+  
+  scale_x_discrete(name = "Domain importance", 
+                   labels = c("1st", "2nd", "3rd", "4th")) +
+  
+  facet_rep_grid(cols = vars(strategy),
+                 rows = vars(scenario),
+                 labeller = labeller(strategy = labels_group,
+                                     scenario = labels_scenario)) +
+
+  theme_main
+  
+ggsave(filename = file.path(folder_figures, "D2_proportion_scenario.png"))
+
+```
+\pagebreak
+
+```{r last, fig.align="center", echo=FALSE, message=FALSE, warning=FALSE, fig.height=3, fig.width=10}
+ggplot(data = intervals_last,
+       aes(x = domain)) +
+  
+  ggtitle("Posterior summary for proportion of last fixations") +
+  
+  geom_point(data = individual_last,
+             aes(y     = percent,
+                 group = subject),
+             position = position_dodge(0.8),
+             color    = "#520005",
+             alpha    = 0.1,
+             size     = 1) +
+  
+  geom_line(data = individual_last,
+            aes(y     = percent,
+                group = subject),
+            position = position_dodge(0.8),
+            color    = "#520005",
+            alpha    = 0.1,
+            linetype = 1) +
+  
+  layers_main +
+  
+  scale_y_continuous(name   = "Proportion of last fixations",
+                     breaks = seq(from = 0,
+                                  to   = 1,
+                                  by   = 0.1)) +
+  
+  scale_x_discrete(name = "Domain importance", 
+                   labels = c("1st", "2nd", "3rd", "4th")) +
+  
+  facet_rep_grid(cols = vars(strategy),
+                 labeller = labeller(strategy = labels_group)) +
+  
+  theme_main
+  
+ggsave(filename = file.path(folder_figures, "E1_last.png"))
+```
+\pagebreak
+
+```{r last-scenario, fig.align="center", echo=FALSE, message=FALSE, warning=FALSE, fig.height=9, fig.width=10}
+ggplot(data = intervals_last_scenario,
+       aes(x = domain)) +
+  
+  ggtitle("Posterior summary for proportion of last fixations by scenario") +
+  
+  geom_point(data = individual_last_scenario,
+             aes(y     = percent,
+                 group = subject),
+             position = position_dodge(0.8),
+             color    = "#520005",
+             alpha    = 0.1,
+             size     = 1) +
+  
+  geom_line(data = individual_last_scenario,
+            aes(y     = percent,
+                group = subject),
+            position = position_dodge(0.8),
+            color    = "#520005",
+            alpha    = 0.1,
+            linetype = 1) +
+  
+  layers_main +
+  
+  scale_y_continuous(name   = "Proportion of fixations",
+                     breaks = seq(from = 0,
+                                  to   = 1,
+                                  by   = 0.1)) +
+  
+  scale_x_discrete(name = "Domain importance", 
+                   labels = c("1st", "2nd", "3rd", "4th")) +
+  
+  facet_rep_grid(cols = vars(strategy),
+                 rows = vars(scenario),
+                 labeller = labeller(strategy = labels_group,
+                                     scenario = labels_scenario)) +
+
+  theme_main
+  
+ggsave(filename = file.path(folder_figures, "E2_last_scenario.png"))
+
+```
+\pagebreak
+
+# FOLLOW UP COMPARISONS
+```{r performance-change-difference, fig.align="center", echo=FALSE, message=FALSE, warning=FALSE, fig.height=6, fig.width=10}
+ggplot(data = comp_performance_change,
+       aes(x = difference)) +
+  
+  ggtitle("Difference between the posterior predictions \nfor the accuracy across T1 and T2") +
+  
+  geom_histogram(fill = "darkred",
+                 alpha = 0.3,
+                 color = "darkred") +
+  
+  layers_comparisons +
+  
+  theme_comparisons +
+  
+  facet_rep_grid(cols   = vars(strategy), 
+                 rows   = vars(experiment), 
+                 switch = "y") 
+  
+ggsave(filename = file.path(folder_figures, "SB1_performance_change.png"))
+
+```
+\pagebreak
+
+```{r performance-change-group, fig.align="center", echo=FALSE, message=FALSE, warning=FALSE, fig.height=6, fig.width=15}
+ggplot(data = comp_performance_group_diff,
+       aes(x = value)) +
+  
+  ggtitle("Paired comparisons on the performance change between phases across groups") +
+  
+  geom_histogram(fill = "darkred",
+                 alpha = 0.3,
+                 color = "darkred") +
+  
+  layers_comparisons +
+  
+  theme_comparisons +
+  
+  facet_rep_grid(cols   = vars(comparison), 
+                 rows   = vars(experiment), 
+                 switch = "y", scales = "free_x",
+                 labeller = labeller(comparison = labels_group_comparisons)) 
+
+ggsave(filename = file.path(folder_figures, "SB2_performance_change_group.png"))
+
+```
+\pagebreak
+
+```{r performance-phase1-group, fig.align="center", echo=FALSE, message=FALSE, warning=FALSE, fig.height=3, fig.width=15}
+ggplot(data = comp_performance_T1,
+       aes(x = value)) +
+  
+  ggtitle("Difference in performance at T1 across groups") +
+  
+  geom_histogram(fill = "darkred",
+                 alpha = 0.3,
+                 color = "darkred") +
+  
+  layers_comparisons +
+  
+  theme_comparisons +
+  
+  facet_rep_grid(cols   = vars(comparison), 
+                 switch = "y", scales = "free_x",
+                 labeller = labeller(comparison = labels_group_comparisons)) 
+  
+ggsave(filename = file.path(folder_figures, "SB3_performance_T1.png"))
+
+```
+\pagebreak
+
+```{r first-difference, fig.align="center", echo=FALSE, message=FALSE, warning=FALSE, fig.height=9, fig.width=10}
+p <- list()
+
+for (iStrategy in 1:n_strategies) {
+  
+  p[[iStrategy]] <- ggplot(data = filter(comp_first, strategy == list_strategies[iStrategy]),
+                           aes(x = difference)) +
+    
+    geom_histogram(fill  = "darkred",
+                   alpha = 0.3,
+                   color = "darkred") +
+    
+    layers_comparisons +
+    
+    theme_comparisons +
+    
+    facet_rep_grid(cols = vars(comparison), 
+                   rows = vars(strategy), 
+                   switch = "y", scales = "free_x",
+                   labeller = labeller(comparison = labels_domain_comparisons))
+  
+}
+ 
+top <- plot_grid(p[[1]], p[[2]], p[[3]], nrow = 1, labels = c("A", "B", "C"))
+middle <- plot_grid(p[[4]], labels = "D")
+bottom <- plot_grid(p[[5]], labels = "E")
+
+plot_grid(top, middle, bottom, nrow = 3, ncol = 1)
+
+
+ggsave(filename = file.path(folder_figures, "SC1_first_comparisons.png"))
+
+```
+\pagebreak
+
+```{r proportion-difference, fig.align="center", echo=FALSE, message=FALSE, warning=FALSE, fig.height=12, fig.width=10}
+p <- list()
+
+for (iStrategy in 1:n_strategies) {
+  
+  p[[iStrategy]] <- ggplot(data = filter(comp_proportion, strategy == list_strategies[iStrategy]),
+                           aes(x = difference)) +
+    
+    geom_histogram(fill  = "darkred",
+                   alpha = 0.3,
+                   color = "darkred") +
+    
+    layers_comparisons +
+  
+    theme_comparisons +
+    
+    facet_rep_grid(cols = vars(comparison), 
+                   rows = vars(strategy), 
+                   switch = "y", scales = "free_x",
+                   labeller = labeller(comparison = labels_domain_comparisons)) 
+  
+}
+ 
+top <- plot_grid(p[[1]], p[[2]], nrow = 1, labels = c("A", "B"))
+middle1 <- plot_grid(p[[3]], labels = "C")
+middle2 <- plot_grid(p[[4]], labels = "D")
+bottom <- plot_grid(p[[5]], labels = "E")
+
+plot_grid(top, middle1, middle2, bottom, nrow = 4, ncol = 1)
+
+
+ggsave(filename = file.path(folder_figures, "SD1_proportion_comparisons.png"))
+
+```
+\pagebreak
+
+```{r last-difference, fig.align="center", echo=FALSE, message=FALSE, warning=FALSE, fig.height=12, fig.width=10}
+p <- list()
+
+for (iStrategy in 1:n_strategies) {
+  
+  p[[iStrategy]] <- ggplot(data = filter(comp_last, strategy == list_strategies[iStrategy]),
+                           aes(x = difference)) +
+  
+    geom_histogram(fill  = "darkred",
+                   alpha = 0.3,
+                   color = "darkred") +
+    
+    layers_comparisons +
+  
+    theme_comparisons +
+    
+    facet_rep_grid(cols = vars(comparison), 
+                   rows = vars(strategy), 
+                   switch = "y", scales = "free_x",
+                   labeller = labeller(comparison = labels_domain_comparisons)) 
+  
+  
+}
+ 
+top <- plot_grid(p[[1]], p[[2]], nrow = 1, labels = c("A", "B"))
+middle1 <- plot_grid(p[[3]], labels = "C")
+middle2 <- plot_grid(p[[4]], labels = "D")
+bottom <- plot_grid(p[[5]], labels = "E")
+
+plot_grid(top, middle1, middle2, bottom, nrow = 4, ncol = 1)
+
+ggsave(filename = file.path(folder_figures, "SE1_last_comparisons.png"))
+
+```
+\pagebreak
+
+
+## DECISION SCENARIOS
+
+```{r first-scenario-difference, fig.align="center", echo=FALSE, message=FALSE, warning=FALSE, fig.height=9, fig.width=10}
+p <- list()
+
+for (iStrategy in 1:n_strategies) {
+  
+  p[[iStrategy]] <- ggplot(data = filter(comp_first_scenario, strategy == list_strategies[iStrategy]),
+                           aes(x = difference)) +
+    
+    geom_histogram(fill  = "darkred",
+                   alpha = 0.3,
+                   color = "darkred") +
+    
+    layers_comparisons +
+  
+    theme_comparisons +
+    
+    facet_rep_grid(cols = vars(scenario), 
+                   rows = vars(comparison), 
+                   switch = "y", scales = "free_x",
+                   labeller = labeller(comparison = labels_domain_comparisons,
+                                       scenario   = labels_scenario))
+  
+}
+ 
+first_second_serial <- plot_grid(p[[1]], p[[2]], p[[3]], nrow = 3, labels = c("A", "B", "C"))
+lazy <- plot_grid(p[[5]])
+tally <- plot_grid(p[[4]])
+
+plot_grid(first_second_serial)
+ggsave(filename = file.path(folder_figures, "SC2_first_scenario_comparisons_A.png"))
+
+plot_grid(tally)
+ggsave(filename = file.path(folder_figures, "SC2_first_scenario_comparisons_B.png"))
+
+plot_grid(lazy)
+ggsave(filename = file.path(folder_figures, "SC2_first_scenario_comparisons_C.png"))
+
+
+```
+\pagebreak
+
+```{r proportion-scenario-difference, fig.align="center", echo=FALSE, message=FALSE, warning=FALSE, fig.height=12, fig.width=14}
+p <- list()
+
+for (iStrategy in 1:n_strategies) {
+  
+  p[[iStrategy]] <- ggplot(data = filter(comp_proportion_scenario, strategy == list_strategies[iStrategy]),
+                           aes(x = difference)) +
+    
+    
+    geom_histogram(fill  = "darkred",
+                   alpha = 0.3,
+                   color = "darkred") +
+    
+    layers_comparisons +
+  
+    theme_comparisons +
+    
+    facet_rep_grid(cols = vars(scenario), 
+                   rows = vars(comparison), 
+                   switch = "y", scales = "free_x",
+                   labeller = labeller(comparison = labels_domain_comparisons,
+                                       scenario   = labels_scenario))
+  
+  
+}
+ 
+first_second <- plot_grid(p[[1]], p[[2]], labels = c("A", "B"), cols = 1)
+serial <- plot_grid(p[[3]], cols = 1)
+tallying <- plot_grid(p[[4]], cols = 1)
+lazy <- plot_grid(p[[5]], cols = 1)
+
+
+plot_grid(first_second)
+ggsave(filename = file.path(folder_figures, "SD2_proportion_scenario_comparisons_A.png"))
+
+plot_grid(serial)
+ggsave(filename = file.path(folder_figures, "SD2_proportion_scenario_comparisons_B.png"))
+
+plot_grid(tallying)
+ggsave(filename = file.path(folder_figures, "SD2_proportion_scenario_comparisons_C.png"))
+
+plot_grid(lazy)
+ggsave(filename = file.path(folder_figures, "SD2_proportion_scenario_comparisons_D.png"))
+
+```
+\pagebreak
+
+```{r last-scenario-difference, fig.align="center", echo=FALSE, message=FALSE, warning=FALSE, fig.height=12, fig.width=14}
+p <- list()
+
+for (iStrategy in 1:n_strategies) {
+  
+  p[[iStrategy]] <- ggplot(data = filter(comp_last_scenario, strategy == list_strategies[iStrategy]),
+                           aes(x = difference)) +
+  
+    geom_histogram(fill  = "darkred",
+                   alpha = 0.3,
+                   color = "darkred") +
+    
+    layers_comparisons +
+  
+    theme_comparisons +
+    
+    facet_rep_grid(cols = vars(scenario), 
+                   rows = vars(comparison), 
+                   switch = "y", scales = "free_x",
+                   labeller = labeller(comparison = labels_domain_comparisons,
+                                       scenario   = labels_scenario))
+  
+}
+ 
+first_second <- plot_grid(p[[1]], p[[2]], labels = c("A", "B"), cols = 1)
+serial <- plot_grid(p[[3]], cols = 1)
+tallying <- plot_grid(p[[4]], cols = 1)
+lazy <- plot_grid(p[[5]], cols = 1)
+
+plot_grid(first_second)
+ggsave(filename = file.path(folder_figures, "SE2_last_scenario_comparisons_A.png"))
+
+plot_grid(serial)
+ggsave(filename = file.path(folder_figures, "SE2_last_scenario_comparisons_B.png"))
+
+plot_grid(tallying)
+ggsave(filename = file.path(folder_figures, "SE2_last_scenario_comparisons_C.png"))
+
+plot_grid(lazy)
+ggsave(filename = file.path(folder_figures, "SE2_last_scenario_comparisons_D.png"))
+
+```
+\pagebreak
+
+
+
+
+
+

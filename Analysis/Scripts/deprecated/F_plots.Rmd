@@ -1,0 +1,1148 @@
+---
+title: "plots"
+output: html_notebook
+---
+
+```{r setup, include = FALSE}
+if(!"tidyverse" %in% rownames(installed.packages())) install.packages("tidyverse")
+if(!"ggplot2" %in% rownames(installed.packages())) install.packages("ggplot2")
+if(!"cowplot" %in% rownames(installed.packages())) install.packages("cowplot")
+if(!"ggforce" %in% rownames(installed.packages())) install.packages("ggforce")
+if(!"lemon" %in% rownames(installed.packages())) install.packages("lemon")
+if(!"ggridges" %in% rownames(installed.packages())) install.packages("ggridges")
+
+library(tidyverse)
+library(ggplot2)
+library(cowplot)
+library(ggforce)
+library(lemon)
+library(ggridges)
+
+```
+
+```{r base-paths, echo = F}
+folder_root <- "C:/Users/rerr_/Google Drive/Graduate/Lab/Studies/MultiCue_Probabilistic/three_phases/INV/Analysis"
+
+folder_references   <- file.path(folder_root, "References")
+folder_documents    <- file.path(folder_root, "Documents")
+folder_scripts      <- file.path(folder_root, "Scripts")
+folder_results      <- file.path(folder_root, "Results")
+folder_behavior     <- file.path(folder_root, "Behavior")
+folder_demographics <- file.path(folder_root, "Demographics_scales")
+folder_figures      <- file.path(folder_documents, "Tables and Figures")
+
+```
+
+```{r summaries, echo = F}
+load(file.path(folder_results, "plot_summaries.rds"))
+
+```
+
+```{r plot-labels, echo=F}
+group_labs <- c("First Quantile", "Second Quantile", "Third Quantile", "Fourth Quantile")
+names(group_labs) <- c("1", "2", "3", "4")
+
+domain_labs <- c("1st", "2nd", "3rd", "4th")
+names(domain_labs) <- c("1", "2", "3", "4")
+
+position_labs <- c("1L", "2L", "3L", "4L", "1R", "2R", "3R", "4R")
+names(position_labs) <- c("1", "2", "3", "4", "5", "6", "7", "8")
+
+phase_labs <- c("TP", "T1", "T2")
+names(phase_labs) <- c("1", "2", "3")
+
+case_labs <- c("A (1st)", "B (2nd)", "C (3rd)", "D(4th)")
+names(case_labs) <- c("1", "2", "3", "4")
+
+inv_case_labs <- c("A' (4th)", "B' (3rd)", "C' (2nd)", "D' (1st)")
+names(inv_case_labs) <- c("1", "2", "3", "4")
+
+phase_case_labs <- c("T1 Scenario A", "T1 Scenario B", "T1 Scenario C", "T1 Scenario D", 
+                     "T2 Scenario A", "T2 Scenario B", "T2 Scenario C", "T2 Scenario D")
+
+phase_inv_case_labs <- c("T1 Scenario A'", "T1 Scenario B'", "T1 Scenario C'", "T1 Scenario D'", 
+                         "T2 Scenario A'", "T2 Scenario B'", "T2 Scenario C'", "T2 Scenario D'")
+
+names(phase_case_labs) <- c("2:1", "2:2", "2:3", "2:4", "3:1", "3:2", "3:3", "3:4")
+names(phase_inv_case_labs) <- c("2:1", "2:2", "2:3", "2:4", "3:1", "3:2", "3:3", "3:4")
+
+
+trans_labs <- c("1-1", "2-2", "3-3", "4-4",
+                "1-2", "2-3", "3-4",
+                "2-1", "3-2", "4-3",
+                "1-3", "1-4", "2-4",
+                "3-1", "4-1", "4-2")
+
+names(trans_labs) <- c("1_1", "2_2", "3_3", "4_4",
+                       "1_2", "2_3", "3_4",
+                       "2_1", "3_2", "4_3",
+                       "1_3", "1_4", "2_4",
+                       "3_1", "4_1", "4_2")
+
+```
+
+```{r performance, fig.align="center", fig.cap = "Performance quartiles during T1.", echo=FALSE, warning=F, message=F, fig.width = 3, fig.height=8}
+ggplot(data = filter(accuracy_summary, phase == 2),
+       aes(x = phase)) +
+  
+  geom_violin(aes(y = accuracy), 
+              fill = "springgreen4", alpha = 0.5,
+              draw_quantiles = c(0.245, 0.545, 0.7455)) +
+  
+  geom_sina(aes(y = accuracy), size = 2) +
+  
+  scale_y_continuous(name   = "Proportion of correct trials",
+                     breaks = seq(from = 0,
+                                  to   = 1,
+                                  by   = 0.1)) +
+  scale_x_discrete(name = NULL,
+                   labels = "T1") +
+  
+  theme_bw() +
+
+  coord_capped_cart(bottom = "both",
+                    left   = "both", ylim = c(0.4, 1)) +
+  
+  theme(legend.position    = "bottom",
+        strip.placement    = "outside",
+        panel.grid.minor.x = element_blank(),
+        panel.spacing      = unit(0.01,"cm"),
+        panel.border       = element_blank(),
+        axis.line = element_line(color = "black"),
+        axis.ticks.x       = element_blank(), 
+        text               = element_text(family = "Helvetica", size = 14)) +
+  
+  background_grid(major = "y")
+
+ggsave(filename = file.path(folder_figures, "performance_quartiles.png"))
+```
+
+```{r performance-change, fig.align="center", fig.cap = "Difference in performance (as percent of accurate trials) across testing phases. Means with within subjects standard error bars showed.", echo=FALSE, message=FALSE, warning=FALSE}
+
+ggplot(data = filter(accuracy_summary, phase != 1),
+       aes(x = phase)) +
+  
+  geom_line(aes(x =  phase,
+                y = mean_value,
+                group = group,
+                color = group),                
+            position = position_dodge(0.1),
+            alpha = 0.8,
+            size  = 1.2) +
+  
+  geom_errorbar(aes(ymin = mean_value - se, 
+                    ymax = mean_value + se, 
+                    group = group),
+                position = position_dodge(0.1),
+                color = "black",
+                width = 0.1,
+                size  = 0.5) +
+  
+  geom_point(aes(y = mean_value, 
+                 fill =group,
+                 shape =group),
+             position = position_dodge(0.1),
+             color = "black",
+             size = 4,
+             alpha = 0.5) +
+  
+  scale_shape_manual(name   = "Domain \nImportance",
+                     #labels = domain_labs,
+                     values = c(21, 22, 23, 24)) +
+
+  scale_fill_manual(name   = "Performance \nQuantiles",
+                    labels = group_labs,
+                    values = c("dodgerblue4", "springgreen4", "goldenrod4", "firebrick4")) +
+
+  scale_color_manual(name   = "Performance \nQuantiles",
+                     labels = group_labs,
+                     values = c("dodgerblue4", "springgreen4", "goldenrod4", "firebrick4")) +
+  
+  scale_y_continuous(name   = "Proportion of correct trials",
+                     breaks = seq(from = 0,
+                                  to   = 1,
+                                  by   = 0.1)) +
+
+  scale_x_discrete(name = NULL, expand = c(0.3,0.3),
+                   labels = c("T1", "T2")) +
+  
+  guides(shape = FALSE, color = FALSE, fill = FALSE) +
+  
+  theme_bw() +
+
+  coord_capped_cart(bottom = "both",
+                    left   = "both", ylim = c(0.5, 0.9), xlim = c(1, 2)) +
+  
+  theme(legend.position    = "bottom",
+        strip.placement    = "outside",
+        panel.grid.minor.x = element_blank(),
+        panel.spacing      = unit(0.01,"cm"),
+        panel.border       = element_blank(),
+        axis.line          = element_line(color = "black"),
+        axis.text          = element_text(color = "black"),
+        #axis.ticks.x       = element_blank(),
+        #axis.line.x        = element_blank(), 
+        #axis.text.x        = element_blank(), 
+        text               = element_text(family = "Helvetica", size = 14)) +
+  
+    background_grid(major = "none") 
+
+ggsave(filename = file.path(folder_figures, "performance_change.png"))
+
+```
+
+```{r first-grp, fig.align="center", fig.cap = "Location of first fixation across domains (ordered by importance) across trials in both T1 and T2. Means with within subjects standard error bars showed.", echo=FALSE, message=FALSE, warning=FALSE, fig.height=8, fig.width=4}
+
+ggplot(data = first_summary,
+       aes(x = rank)) +
+  
+    geom_violin(aes(y     = prop_trials,
+                    #color = group,
+                    fill  = group), 
+                color = "white",
+                alpha = 0.4) +
+
+  geom_sina(aes(y     = prop_trials,
+                shape = rank,
+                fill  = group,
+                color = group,), 
+            alpha = 0.4,
+            size  = 1.5) +
+
+  geom_errorbar(aes(ymin = mean_value - se, 
+                    ymax = mean_value + se, 
+                    group = rank), 
+                position = position_dodge(0.9),
+                color = "black",
+                width = 0.2,
+                size  = 0.3) +
+  
+  geom_smooth(aes(y = mean_value,
+                  x = as.numeric(rank),
+                #group = id,
+                  color = group),
+              linetype = 2,
+              size = 1.2,
+              alpha = 0.6) +
+
+  geom_point(aes(y     = mean_value,
+                 shape = rank,
+                 fill  = group,
+                 #color = group,
+                 group = rank),
+             color    = "black",
+             position = position_dodge(0.9),
+             size     = 3) +
+  
+  
+  scale_shape_manual(name   = "Domain \nImportance",
+                     #labels = domain_labs,
+                     values = c(21, 22, 23, 24)) +
+  
+  scale_fill_manual(name   = "Performance \nQuantiles",
+                    labels = group_labs,
+                    values = c("dodgerblue4", "springgreen4", "goldenrod4", "firebrick4")) +
+  
+  scale_color_manual(name   = "Performance \nQuantiles",
+                     labels = group_labs,
+                     values = c("dodgerblue4", "springgreen4", "goldenrod4", "firebrick4")) +  
+  
+  scale_y_continuous(name   = "Mean Proportion of Trials",
+                     breaks = seq(from = 0,
+                                  to   = 1,
+                                  by   = 0.25)) +
+  
+  scale_x_discrete(name   = "Domain Importance",
+                   labels = domain_labs) +
+
+  guides(shape = FALSE, color = FALSE, fill = FALSE) +
+
+  facet_rep_grid(rows     = vars(group),
+                 cols     = vars(phase),
+                 space    = "free_x", 
+                 labeller = labeller(case  = case_labs, 
+                                     group = group_labs,
+                                     phase = phase_labs,
+                                     rank  = domain_labs)) +
+
+  theme_bw() + 
+
+  coord_capped_cart(bottom = "both",
+                    left   = "both", ylim = c(0, 1)) +
+
+  theme(legend.position    = "bottom",
+        strip.placement    = "outside",
+        #strip.background   = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.spacing      = unit(0.01,"cm"),
+        panel.border       = element_blank(), 
+        axis.line          = element_line(color = "black"),
+        axis.text          = element_text(color = "black"),
+        #axis.line.x        = element_blank(),
+        #axis.ticks.x       = element_blank(),
+        text               = element_text(family = "Helvetica", size = 14)) +
+  
+  background_grid(major = "y") 
+
+ggsave(filename = file.path(folder_figures, "first_fixation.png"))
+
+
+```
+
+```{r fixations-rank-grp, fig.align="center", fig.cap = "Average Mean Proportion of Fixations allocated to each domain (ordered by importance) across trials in both T1 and T2. Means with within subjects standard error bars showed.", echo=FALSE, message=FALSE, warning=FALSE, fig.height=8, fig.width=4}
+
+ggplot(data = filter(fixations_summary),
+       aes(x = rank)) +
+  
+    geom_violin(aes(y     = prop_fixations,
+                  #color = group,
+                  fill  = group), 
+              color = "white",
+              alpha = 0.4) +
+
+  geom_sina(aes(y     = prop_fixations,
+                shape = rank,
+                fill  = group,
+                color = group,), 
+            alpha = 0.4,
+            size  = 1.5) +
+  
+
+  geom_errorbar(aes(ymin = mean_value - se, 
+                    ymax = mean_value + se, 
+                    group = rank), 
+                position = position_dodge(0.9),
+                color = "black",
+                width = 0.2,
+                size  = 0.5) +
+  
+  geom_line(aes(y = mean_value,
+                x = as.numeric(rank),
+                #group = id,
+                color = group),
+            linetype = 2,
+            size = 1.2,
+            alpha = 0.6) +
+  
+  geom_point(aes(y     = mean_value,
+                 shape = rank,
+                 fill  = group,
+                 color = group,
+                 group = rank),
+             color = "black",
+             # fill = "black",
+             position = position_dodge(0.9),
+             size     = 3) +
+  
+    scale_shape_manual(name   = "Domain \nImportance",
+                     #labels = domain_labs,
+                     values = c(21, 22, 23, 24)) +
+  
+  scale_fill_manual(name   = "Performance \nQuantiles",
+                    labels = group_labs,
+                    values = c("dodgerblue4", "springgreen4", "goldenrod4", "firebrick4")) +
+  
+  scale_color_manual(name   = "Performance \nQuantiles",
+                     labels = group_labs,
+                     values = c("dodgerblue4", "springgreen4", "goldenrod4", "firebrick4")) +  
+  
+  scale_y_continuous(name   = "Mean Proportion of Fixations", 
+                     breaks = seq(from = 0,
+                                  to   = 1,
+                                  by   = 0.25)) +
+  
+  scale_x_discrete(name   = "Domain Importance",
+                   labels = domain_labs) +
+
+  guides(shape = FALSE, color = FALSE, fill = FALSE) +
+
+  facet_rep_grid(rows     = vars(group),
+                 cols     = vars(phase),
+                 space    = "free_x", 
+                 labeller = labeller(case  = case_labs, 
+                                     group = group_labs,
+                                     phase = phase_labs,
+                                     rank  = domain_labs)) +
+
+  theme_bw() + 
+
+  coord_capped_cart(bottom = "both",
+                    left   = "both", ylim = c(0, 1)) +
+
+  theme(legend.position    = "bottom",
+        strip.placement    = "outside",
+        axis.text = element_text(color = "black"),
+        axis.line = element_line(color = "black"),
+        panel.grid.minor.x = element_blank(),
+        panel.spacing      = unit(0.01,"cm"),
+        panel.border       = element_blank(), 
+        text               = element_text(family = "Helvetica", size = 14)) +
+  
+  background_grid(major = "y") 
+
+ggsave(filename = file.path(folder_figures, "fixation_proportions.png"))
+
+
+```
+
+```{r cue-transitions-grp, fig.align="center", fig.cap = "Proportion of transitions occurred across cues. Means with within subjects standard error bars showed.", echo=FALSE, message=FALSE, warning=FALSE, fig.height=8, fig.width=4}
+
+ggplot(data = filter(transitions_cue_summary),
+       aes(x = trans_cue)) +
+  
+  geom_violin(aes(y     = prop_trans_cue,
+                  fill  = group), 
+              color = "white",
+              alpha = 0.4) +
+
+  geom_sina(aes(y     = prop_trans_cue,
+                fill  = group,
+                group = trans_cue,
+                color = group,), 
+            alpha = 0.4,
+            size  = 1.5) +
+  
+
+  geom_errorbar(aes(ymin = mean_value - se, 
+                    ymax = mean_value + se,
+                   group = trans_cue), 
+                position = position_dodge(0.9),
+                color = "black",
+                width = 0.2,
+                size  = 0.3) +
+  
+  geom_point(aes(y     = mean_value,
+                 fill  = group,
+                 group = trans_cue,
+                 color = group),
+             shape = 21,
+             position = position_dodge(0.9),
+             size     = 2) +
+  
+   scale_fill_manual(name   = "Performance \nQuantiles",
+                     labels = group_labs,
+                     values = c("dodgerblue4", "springgreen4", "goldenrod4", "firebrick4")) +
+
+   scale_color_manual(name   = "Performance \nQuantiles",
+                      labels = group_labs,
+                      values = c("dodgerblue4", "springgreen4", "goldenrod4", "firebrick4")) +
+
+   scale_y_continuous(name   = "Proportion of Transitions",
+                      breaks = seq(from = 0,
+                                   to   = 1,
+                                   by   = 0.25)) +
+
+   scale_x_discrete(name   = "Transition direction",
+                    labels = trans_labs
+                    ) +
+
+  guides(shape = FALSE, color = FALSE, fill = FALSE) +
+
+  facet_rep_grid(group ~ phase,  scales = "free_x",
+                 #repeat.tick.labels = 'left',
+                 space    = "free_x",
+                 #switch   = "x",
+                 labeller = labeller(case       = case_labs,
+                                     group      = group_labs,
+                                     phase      = phase_labs,
+                                     rank       = domain_labs,
+                                     rank_trans = trans_labs)) +
+
+  theme_bw() +
+
+  coord_capped_cart(bottom = "both",
+                    left   = "both", ylim = c(0,1)) +
+
+  theme(legend.position    = "bottom",
+        strip.placement    = "outside",
+        #strip.background   = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.spacing      = unit(0.01,"cm"),
+        panel.border       = element_blank(),
+        axis.line = element_line(color = "black"),
+        text               = element_text(family = "Helvetica", size = 14)) +
+  
+  background_grid(major = "y") 
+
+ggsave(filename = file.path(folder_figures, "transitions_cue.png"))
+
+```
+
+```{r rt-case-grp, fig.align="center", fig.cap = "RT by scenario (discriminating domain in descending order of importance) in both testing phases. Means with within subjects standard error bars showed.", echo=FALSE, message=FALSE, warning=FALSE, fig.height=8, fig.width=4}
+
+ggplot(data = rt_case_summary,
+       aes(x = case)) +
+  
+  geom_violin(aes(y     = mean_rt,
+                  shape = case,
+                  #color = group,
+                  fill  = group),
+              color = "white",
+              alpha = 0.4) +
+
+  geom_sina(aes(y     = mean_rt,
+                #shape = case,
+                fill  = group,
+                color = group,), 
+            alpha = 0.4,
+            size  = 1.5) +
+  
+
+  geom_errorbar(aes(ymin = mean_value - se, 
+                    ymax = mean_value + se, 
+                    group = case), 
+                position = position_dodge(0.9),
+                color = "black",
+                width = 0.2,
+                size  = 0.3) +
+  
+  geom_smooth(aes(y = mean_value,
+                  x = as.numeric(case),
+                #group = id,
+                color = group),
+            linetype = 2,
+            size = 1.2,
+            alpha = 0.6) +
+  
+  geom_point(aes(y     = mean_value,
+                 shape = case,
+                 fill  = group,
+                 #color = group,
+                 group = case),
+             color = "black",
+             position = position_dodge(0.9),
+             size     = 3) +
+  
+  
+  scale_shape_manual(name   = "Domain \nImportance",
+                     #labels = domain_labs,
+                     values = c(21, 22, 23, 24)) +
+  
+  scale_fill_manual(name   = "Performance \nQuantiles",
+                    labels = group_labs,
+                    values = c("dodgerblue4", "springgreen4", "goldenrod4", "firebrick4")) +
+  
+  scale_color_manual(name   = "Performance \nQuantiles",
+                     labels = group_labs,
+                     values = c("dodgerblue4", "springgreen4", "goldenrod4", "firebrick4")) +  
+  
+  scale_y_continuous(name   = "Mean RT per Trial (seconds)",
+                     breaks = seq(from = 0,
+                                  to   = 7,
+                                  by   = 1)) +
+  
+  scale_x_discrete(name   = "Scenario (Best Discriminating Domain)",
+                   labels = case_labs) +
+
+  guides(shape = FALSE, color = FALSE, fill = FALSE) +
+
+  facet_rep_grid(rows     = vars(group),
+                 cols     = vars(phase),
+                 space    = "free_x", 
+                 labeller = labeller(case  = case_labs, 
+                                     group = group_labs,
+                                     phase = phase_labs,
+                                     rank  = domain_labs)) +
+
+  theme_bw() + 
+
+  coord_capped_cart(bottom = "both",
+                    left   = "both", ylim = c(0, 7)) +
+
+  theme(legend.position    = "bottom",
+        strip.placement    = "outside",
+        #strip.background   = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.spacing      = unit(0.01,"cm"),
+        panel.border       = element_blank(), 
+        axis.line          = element_line(color = "black"),
+        axis.text          = element_text(color = "black"),
+        #axis.line.x        = element_blank(),
+        #axis.ticks.x       = element_blank(),
+        text               = element_text(family = "Helvetica", size = 14)) +
+  
+  background_grid(major = "y") 
+
+ggsave(filename = file.path(folder_figures, "rt_case.png"))
+
+
+```
+
+```{r fixations-case-grp, fig.align="center", fig.cap = "Number of fixations by scenario (discriminating domain in descending order of importance) in both testing phases. Means with within subjects 95\\% confidence intervals are shown.", echo=FALSE, message=FALSE, warning=FALSE, fig.height=8, fig.width=4}
+
+ggplot(data = fixations_case_summary,
+       aes(x = case)) +
+  
+  geom_violin(aes(y     = mean_fixations_case,
+                  #color = group,
+                  fill  = group), 
+              color = "white", 
+              alpha = 0.4) +
+
+  geom_sina(aes(y     = mean_fixations_case,
+                #shape = rank,
+                fill  = group,
+                color = group,), 
+            alpha = 0.4,
+            size  = 1.5) +
+  
+
+  geom_errorbar(aes(ymin = mean_value - se, 
+                    ymax = mean_value + se, 
+                    group = case), 
+                position = position_dodge(0.9),
+                color = "black",
+                width = 0.2,
+                size  = 0.3) +
+  
+  geom_smooth(aes(y = mean_value,
+                  x = as.numeric(case),
+                #group = id,
+                  color = group),
+            linetype = 2,
+            size = 1.2,
+            alpha = 0.6) +
+  
+  geom_point(aes(y     = mean_value,
+                 shape = case,
+                 fill  = group,
+                 #color = group,
+                 group = case),
+             color = "black",
+             position = position_dodge(0.9),
+             size     = 3) +
+  
+  
+  scale_shape_manual(name   = "Domain \nImportance",
+                     #labels = domain_labs,
+                     values = c(21, 22, 23, 24)) +
+  
+  scale_fill_manual(name   = "Performance \nQuantiles",
+                    labels = group_labs,
+                    values = c("dodgerblue4", "springgreen4", "goldenrod4", "firebrick4")) +
+  
+  scale_color_manual(name   = "Performance \nQuantiles",
+                     labels = group_labs,
+                     values = c("dodgerblue4", "springgreen4", "goldenrod4", "firebrick4")) +  
+  
+  scale_y_continuous(name   = "Number of fixations per trial",
+                     breaks = seq(from = 0,
+                                  to   = 25,
+                                  by   = 5)) +
+  
+  scale_x_discrete(name   = "Scenario (Best Discriminating Domain)",
+                   labels = case_labs) +
+
+  guides(shape = FALSE, color = FALSE, fill = FALSE) +
+
+  facet_rep_grid(rows     = vars(group),
+                 cols     = vars(phase),
+                 space    = "free_x", 
+                 labeller = labeller(case  = case_labs, 
+                                     group = group_labs,
+                                     phase = phase_labs,
+                                     rank  = domain_labs)) +
+
+  theme_bw() + 
+
+  coord_capped_cart(bottom = "both",
+                    left   = "both", ylim = c(0, 25)) +
+
+  theme(legend.position    = "bottom",
+        strip.placement    = "outside",
+        #strip.background   = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.spacing      = unit(0.01,"cm"),
+        panel.border       = element_blank(), 
+        axis.line = element_line(color = "black"),
+        axis.text = element_text(color = "black"),
+        #axis.line.x        = element_blank(),
+        #axis.ticks.x       = element_blank(),
+        text               = element_text(family = "Helvetica", size = 14)) +
+  
+  background_grid(major = "y") 
+
+ggsave(filename = file.path(folder_figures, "fixations_case.png"))
+
+```
+
+```{r fixations-inv-case-grp, fig.align="center", fig.cap = "Number of fixations by scenario (discriminating domain in ascending order of importance) in both testing phases. Means with within subjects standard error bars showed.", echo=FALSE, message=FALSE, warning=FALSE, fig.height=8, fig.width=4}
+ggplot(data = fixations_invcase_summary,
+       aes(x = inv_case)) +
+  
+  geom_violin(aes(y     = mean_fixations_invcase,
+                  #color = group,
+                  fill  = group), 
+              color = "white",
+              alpha = 0.4) +
+
+  geom_sina(aes(y     = mean_fixations_invcase,
+                #shape = rank,
+                fill  = group,
+                color = group,), 
+            alpha = 0.4,
+            size  = 1.5) +
+  
+
+  geom_errorbar(aes(ymin = mean_value - se, 
+                    ymax = mean_value + se, 
+                    group = inv_case), 
+                position = position_dodge(0.9),
+                color = "black",
+                width = 0.2,
+                size  = 0.3) +
+  
+  geom_smooth(aes(y = mean_value,
+                  x = as.numeric(inv_case),
+                #group = id,
+                  color = group),
+            linetype = 2,
+            size = 1.2,
+            alpha = 0.6) +
+  
+  geom_point(aes(y     = mean_value,
+                 shape = inv_case,
+                 fill  = group,
+                 color = group,
+                 group = inv_case),
+             color = "black",
+             position = position_dodge(0.9),
+             size     = 3) +
+  
+  
+  scale_shape_manual(name   = "Domain \nImportance",
+                     #labels = domain_labs,
+                     values = c(21, 22, 23, 24)) +
+  
+  scale_fill_manual(name   = "Performance \nQuantiles",
+                    labels = group_labs,
+                    values = c("dodgerblue4", "springgreen4", "goldenrod4", "firebrick4")) +
+  
+  scale_color_manual(name   = "Performance \nQuantiles",
+                     labels = group_labs,
+                     values = c("dodgerblue4", "springgreen4", "goldenrod4", "firebrick4")) +  
+  
+  scale_y_continuous(name   = "Number of fixations per trial",
+                     breaks = seq(from = 0,
+                                  to   = 25,
+                                  by   = 5)) +
+  
+  scale_x_discrete(name   = "Scenario (Discriminating Domain)",
+                   labels = inv_case_labs) +
+
+  guides(shape = FALSE, color = FALSE, fill = FALSE) +
+
+  facet_rep_grid(rows     = vars(group),
+                 cols     = vars(phase),
+                 space    = "free_x", 
+                 labeller = labeller(inv_case  = inv_case_labs, 
+                                     group = group_labs,
+                                     phase = phase_labs,
+                                     rank  = domain_labs)) +
+
+  theme_bw() + 
+
+  coord_capped_cart(bottom = "both",
+                    left   = "both", ylim = c(0, 25)) +
+
+  theme(legend.position    = "bottom",
+        strip.placement    = "outside",
+        #strip.background   = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.spacing      = unit(0.01,"cm"),
+        panel.border       = element_blank(), 
+        axis.line = element_line(color = "black"),
+        axis.text = element_text(color = "black"),
+        #axis.line.x        = element_blank(),
+        #axis.ticks.x       = element_blank(),
+        text               = element_text(family = "Helvetica", size = 14)) +
+  
+  background_grid(major = "y") 
+
+ggsave(filename = file.path(folder_figures, "fixations_inv_case.png"))
+
+
+```
+
+```{r rt-inv-case-grp, fig.align="center", fig.cap = "RT by inverted scenario (discriminating domain in ascending order of importance) in both testing phases. Means with within subjects standard error bars showed.", echo=FALSE, message=FALSE, warning=FALSE, fig.height=8, fig.width=4}
+ggplot(data = rt_inv_case_summary,
+       aes(x = inv_case)) +
+  
+  geom_violin(aes(y     = mean_rt,
+                  shape = inv_case,
+                  #color = group,
+                  fill  = group),
+              color = "white",
+              alpha = 0.4) +
+
+  geom_sina(aes(y     = mean_rt,
+                #shape = case,
+                fill  = group,
+                color = group,), 
+            alpha = 0.4,
+            size  = 1.5) +
+  
+
+  geom_errorbar(aes(ymin  = mean_value - se, 
+                    ymax  = mean_value + se, 
+                    group = inv_case), 
+                position = position_dodge(0.9),
+                color = "black",
+                width = 0.2,
+                size  = 0.3) +
+  
+  geom_smooth(aes(y = mean_value,
+                x = as.numeric(inv_case),
+                #group = id,
+                color = group),
+            linetype = 2,
+            size = 1.2,
+            alpha = 0.6) +
+  
+  geom_point(aes(y     = mean_value,
+                 shape = inv_case,
+                 fill  = group,
+                 #color = group,
+                 group = inv_case),
+             color = "black",
+             position = position_dodge(0.9),
+             size     = 3) +
+  
+  
+  scale_shape_manual(name   = "Domain \nImportance",
+                     #labels = domain_labs,
+                     values = c(21, 22, 23, 24)) +
+  
+  scale_fill_manual(name   = "Performance \nQuantiles",
+                    labels = group_labs,
+                    values = c("dodgerblue4", "springgreen4", "goldenrod4", "firebrick4")) +
+  
+  scale_color_manual(name   = "Performance \nQuantiles",
+                     labels = group_labs,
+                     values = c("dodgerblue4", "springgreen4", "goldenrod4", "firebrick4")) +  
+  
+  scale_y_continuous(name   = "Mean RT per Trial (seconds)",
+                     breaks = seq(from = 0,
+                                  to   = 7,
+                                  by   = 1)) +
+  
+  scale_x_discrete(name   = "Scenario (Discriminating Domain)",
+                   labels = inv_case_labs) +
+
+  guides(shape = FALSE, color = FALSE, fill = FALSE) +
+
+  facet_rep_grid(rows     = vars(group),
+                 cols     = vars(phase),
+                 space    = "free_x", 
+                 labeller = labeller(inv_case  = inv_case_labs, 
+                                     group = group_labs,
+                                     phase = phase_labs,
+                                     rank  = domain_labs)) +
+
+  theme_bw() + 
+
+  coord_capped_cart(bottom = "both",
+                    left   = "both", ylim = c(0, 7)) +
+
+  theme(legend.position    = "bottom",
+        strip.placement    = "outside",
+        #strip.background   = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.spacing      = unit(0.01,"cm"),
+        panel.border       = element_blank(), 
+        axis.line = element_line(color = "black"),
+        axis.text = element_text(color = "black"),
+        #axis.line.x        = element_blank(),
+        #axis.ticks.x       = element_blank(),
+        text               = element_text(family = "Helvetica", size = 14)) +
+  
+  background_grid(major = "y") 
+
+ggsave(filename = file.path(folder_figures, "rt_inv_case.png"))
+
+
+```
+
+```{r last-case-grp, fig.align="center", fig.cap = "Last fixated domain (ordered by importance) across trials in different scenarios (A-B), during both testing phases. Means with within subjects standard error bars showed.", echo=FALSE, message=FALSE, warning=FALSE, fig.height=8, fig.width=8}
+
+ggplot(data = filter(last_case_summary),
+       aes(x = rank)) +
+  
+  geom_violin(aes(y     = mean_prop_trials,
+                shape = rank,
+                #color = group,
+                fill  = group), 
+              color = "white",
+              alpha = 0.4) +
+
+  geom_sina(aes(y     = mean_prop_trials,
+                shape = rank,
+                fill  = group,
+                color = group,), 
+            alpha = 0.4,
+            size  = 1.5) +
+  
+
+  geom_errorbar(aes(ymin = mean_value - se, 
+                    ymax = mean_value + se, 
+                    group = rank), 
+                position = position_dodge(0.9),
+                color = "black",
+                width = 0.2,
+                size  = 0.3) +
+  
+  geom_smooth(aes(y = mean_value,
+                  x = as.numeric(rank),
+                #group = id,
+                  color = group),
+            linetype = 2,
+            size = 1.2,
+            alpha = 0.6) +
+  
+  geom_point(aes(y     = mean_value,
+                 shape = rank,
+                 fill  = group,
+                 #color = group,
+                 group = rank),
+             color = "black",
+             position = position_dodge(0.9),
+             size     = 2) +
+  
+  
+  scale_shape_manual(name   = "Domain \nImportance",
+                     #labels = domain_labs,
+                     values = c(21, 22, 23, 24)) +
+  
+  scale_fill_manual(name   = "Performance \nQuantiles",
+                    labels = group_labs,
+                    values = c("dodgerblue4", "springgreen4", "goldenrod4", "firebrick4")) +
+  
+  scale_color_manual(name   = "Performance \nQuantiles",
+                     labels = group_labs,
+                     values = c("dodgerblue4", "springgreen4", "goldenrod4", "firebrick4")) +  
+  
+  scale_y_continuous(name   = "Mean Proportion of Trials",
+                     breaks = seq(from = 0,
+                                  to   = 1,
+                                  by   = 0.25)) +
+  
+  scale_x_discrete(name   = "Importance of Last Fixated Domain",
+                   labels = domain_labs
+                   ) +
+  
+  guides(shape = FALSE, color = FALSE, fill = FALSE) +
+
+  facet_rep_grid(rows     = vars(group),
+                 cols     = vars(phase:case),
+                 #repeat.tick.labels = 'left',
+                 space    = "free_x", 
+                 #switch   = "x",
+                 labeller = labeller(case  = case_labs, 
+                                     group = group_labs,
+                                     phase = phase_labs,
+                                     rank  = domain_labs,
+                                     .cols = phase_case_labs)) +
+
+  theme_bw() + 
+
+  coord_capped_cart(bottom = "both",
+                    left   = "both", ylim = c(0,1)) +
+
+  theme(legend.position    = "bottom",
+        strip.placement    = "outside",
+        #strip.background   = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.spacing      = unit(0.01,"cm"),
+        panel.border       = element_blank(), 
+        axis.line          = element_line(color = "black"),
+        axis.text          = element_text(color = "black"),
+        text               = element_text(family = "Helvetica", size = 14)) +
+  
+  background_grid(major = "y") 
+
+ggsave(filename = file.path(folder_figures, "last_case.png"))
+
+  
+  
+```
+
+```{r last-inv-case-grp, fig.align="center", fig.cap = "Last fixated domain (ordered by ascending order of importance) across trials in different scenarios (A'-D'). Means with within subjects standard error bars showed.", echo=FALSE, message=FALSE, warning=FALSE, fig.height=8, fig.width=8}
+
+ggplot(data = filter(last_inv_case_summary),
+       aes(x = rank)) +
+  
+  geom_violin(aes(y     = mean_prop_trials,
+                  shape = rank,
+                  #color = group,
+                  fill  = group), 
+              color = "white",
+              alpha = 0.4) +
+
+  geom_sina(aes(y     = mean_prop_trials,
+                shape = rank,
+                fill  = group,
+                color = group,), 
+            alpha = 0.4,
+            size  = 1.5) +
+ 
+  geom_errorbar(aes(ymin = mean_value - se, 
+                    ymax = mean_value + se, 
+                    group = rank), 
+                position = position_dodge(0.9),
+                color = "black",
+                width = 0.2,
+                size  = 0.3) +
+  
+  geom_smooth(aes(y = mean_value,
+                  x = as.numeric(rank),
+                #group = id,
+                  color = group),
+            linetype = 2,
+            size = 1.2,
+            alpha = 0.6) +
+  
+  geom_point(aes(y     = mean_value,
+                 shape = rank,
+                 fill  = group,
+                 #color = group,
+                 group = rank),
+             color = "black",
+             position = position_dodge(0.9),
+             size     = 2) +
+  
+  
+  scale_shape_manual(name   = "Domain \nImportance",
+                     #labels = domain_labs,
+                     values = c(21, 22, 23, 24)) +
+  
+  scale_fill_manual(name   = "Performance \nQuantiles",
+                    labels = group_labs,
+                    values = c("dodgerblue4", "springgreen4", "goldenrod4", "firebrick4")) +
+  
+  scale_color_manual(name   = "Performance \nQuantiles",
+                     labels = group_labs,
+                     values = c("dodgerblue4", "springgreen4", "goldenrod4", "firebrick4")) +  
+  
+  scale_y_continuous(name   = "Mean Proportion of Trials",
+                     breaks = seq(from = 0,
+                                  to   = 1,
+                                  by   = 0.25)) +
+  
+  scale_x_discrete(name   = "Importance of Last Fixated Domain",
+                   labels = domain_labs
+                   ) +
+  
+  guides(shape = FALSE, color = FALSE, fill = FALSE) +
+
+  facet_rep_grid(rows     = vars(group),
+                 cols     = vars(phase:inv_case),
+                 #repeat.tick.labels = 'left',
+                 space    = "free_x", 
+                 #switch   = "x",
+                 labeller = labeller(inv_case  = inv_case_labs, 
+                                     group = group_labs,
+                                     phase = phase_labs,
+                                     rank  = domain_labs,
+                                     .cols = phase_inv_case_labs)) +
+
+  theme_bw() + 
+
+  coord_capped_cart(bottom = "both",
+                    left   = "both", ylim = c(0,1)) +
+
+  theme(legend.position    = "bottom",
+        strip.placement    = "outside",
+        #strip.background   = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.spacing      = unit(0.01,"cm"),
+        panel.border       = element_blank(), 
+        axis.line          = element_line(color = "black"),
+        axis.text          = element_text(color = "black"),
+        text               = element_text(family = "Helvetica", size = 14)) +
+  
+  background_grid(major = "y") 
+
+ggsave(filename = file.path(folder_figures, "last_inv_case.png"))
+
+```
+
+```{r rt, fig.align="center", fig.cap = "RT by performance quantile in T1.", echo=FALSE, message=FALSE, warning=FALSE, fig.height=4, fig.width=8}
+
+ggplot(data = rt_summary,
+       aes(x = group)) +
+  
+  geom_violin(aes(y     = phase_rt,
+                  #color = group,
+                  fill  = group), 
+              color = "white",
+              alpha = 0.4) +
+
+  geom_sina(aes(y     = phase_rt,
+                fill  = group,
+                color = group,), 
+            alpha = 0.4,
+            size  = 1.5) +
+
+  geom_errorbar(aes(ymin = mean_value - se, 
+                    ymax = mean_value + se, 
+                    group = group), 
+                position = position_dodge(0.9),
+                color = "black",
+                width = 0.2,
+                size  = 0.3) +
+  
+  geom_point(aes(y     = mean_value,
+                 fill  = group,
+                 shape = phase,
+                 #color = group,
+                 group = group),
+             color    = "black",
+             position = position_dodge(0.9),
+             size     = 3) +
+  
+  
+  scale_shape_manual(name   = "Domain \nImportance",
+                     #labels = domain_labs,
+                     values = c(21, 22, 23, 24)) +
+  
+  scale_fill_manual(name   = "Performance \nQuantiles",
+                    labels = group_labs,
+                    values = c("dodgerblue4", "springgreen4", "goldenrod4", "firebrick4")) +
+  
+  scale_color_manual(name   = "Performance \nQuantiles",
+                     labels = group_labs,
+                     values = c("dodgerblue4", "springgreen4", "goldenrod4", "firebrick4")) +  
+  
+  scale_y_continuous(name   = "Mean RT (seconds)",
+                     breaks = seq(from = 0,
+                                  to   = 10,
+                                  by   = 0.5)) +
+  
+  scale_x_discrete(name   = "Performance Quartile",
+                   labels = domain_labs) +
+
+  guides(shape = FALSE, color = FALSE, fill = FALSE) +
+
+  theme_bw() + 
+
+  coord_capped_cart(bottom = "both",
+                    left   = "both", ylim = c(0, 5)) +
+
+  theme(legend.position    = "bottom",
+        strip.placement    = "outside",
+        #strip.background   = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.spacing      = unit(0.01,"cm"),
+        panel.border       = element_blank(), 
+        axis.line          = element_line(color = "black"),
+        axis.text          = element_text(color = "black"),
+        #axis.line.x        = element_blank(),
+        #axis.ticks.x       = element_blank(),
+        text               = element_text(family = "Helvetica", size = 14)) +
+  
+  background_grid(major = "y") 
+
+ggsave(filename = file.path(folder_figures, "rt.png"))
+
+```
+
