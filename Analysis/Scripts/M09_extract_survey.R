@@ -47,7 +47,7 @@ colnames(raw_experiment2) <- column_names
 
 
 # Get subjects with usable data -------------------------------------------
-load(file.path(folder_keys, "subject_key.RData"))
+load(file.path(folder_keys, "binomial_test_key.RData"))
 
 
 # Merge datasets from both experiments ------------------------------------
@@ -60,7 +60,7 @@ survey_data <- full_join(raw_experiment1, raw_experiment2) %>%
 
 # Clean datasets and create summaries -----------------------------------
 demographic_data <- survey_data %>% 
-  filter(subject %in% subject_key$subject) %>% 
+  filter(subject %in% binomial_test_key$subject) %>% 
   arrange(subject) %>% 
   na.omit() %>% 
   droplevels() %>% 

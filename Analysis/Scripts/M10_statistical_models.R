@@ -107,10 +107,10 @@ priors_multinomial_scenario <- c(
   )
 
 # Performance -------------------------------------------------------------
-performance2.1 <- brm(data   = performance,
+performance2.2 <- brm(data   = performance,
                       family = binomial,
                       
-                      formula = correct | trials(total) ~ 1 + experiment * phase + (1 + experiment * phase | strategy/subject), 
+                      formula = correct | trials(total) ~ 1 + phase + (1 + phase | experiment/strategy/subject), 
                       
                       prior = priors_logistic,
                       
@@ -119,8 +119,9 @@ performance2.1 <- brm(data   = performance,
                       chains  = 4, 
                       cores   = 4,  
                       control = list(adapt_delta = 0.99, max_treedepth = 12), 
-                      file    = file.path(folder_fits, "performance2.1")
+                      file    = file.path(folder_fits, "performance2.2")
                       )
+
 
 # First fixation ----------------------------------------------------------
 first2.1 <- brm(data   = first_fixations,

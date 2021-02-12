@@ -37,7 +37,7 @@ source(file.path(folder_functions, "F02_rope.R"))
 source(file.path(folder_functions, "F02_comparisons.R"))
 
 # Tibbles for group effects -----------------------------------------------
-effect_performance <- performance$data %>% 
+effect_performance <- X$data %>% 
   select(strategy, experiment, phase) %>% 
   unique() %>% 
   mutate(total = 120)
@@ -63,7 +63,7 @@ effect_multiple_scenario <- proportion_fixations_scenario$data %>%
   mutate(total = 100)
 
 # Tibbles to extract individual medians -----------------------------------
-effect_ind_performance <- performance$data %>% 
+effect_ind_performance <- X$data %>% 
   select(subject, strategy, experiment, phase) %>% 
   unique() %>% 
   mutate(total = 120)
@@ -91,6 +91,11 @@ effect_ind_multiple_scenario <- proportion_fixations_scenario$data %>%
 # Formulas for group effects ----------------------------------------------
 formula_experiment_phase <- brmsformula(correct | trials(total) ~ 1 + experiment * phase + (1 + experiment * phase | strategy))
 
+formula_x <- brmsformula(correct | trials(total) ~ 1 + phase + (1 + phase | experiment/strategy))
+
+formula_xin <- brmsformula(correct | trials(total) ~ 1 + phase + (1 + phase | experiment/strategy/subject))
+
+
 formula_intercept <- brmsformula(y | trials(total) ~ 1 + (1 | strategy))
 
 formula_scenario <- brmsformula(y | trials(total) ~ 1 + scenario + (1 + scenario| strategy))
@@ -105,9 +110,9 @@ formula_ind_scenario <- brmsformula(y | trials(total) ~ 1 + scenario + (1 + scen
 
 # Performance -------------------------------------------------------------
 # Group Effects
-samples_performance <- tidy_posterior(posterior = performance, 
+samples_performance <- tidy_posterior(posterior = X, 
                                       effects   = effect_performance, 
-                                      formula   = formula_experiment_phase)
+                                      formula   = formula_x)
 
 intervals_performance <- samples_performance %>% 
   group_by(strategy, experiment, phase) %>% 
@@ -117,9 +122,9 @@ intervals_performance <- samples_performance %>%
   ungroup()
 
 # Individual estimates
-individual_performance <- tidy_posterior(posterior = performance, 
+individual_performance <- tidy_posterior(posterior = X, 
                                          effects   = effect_ind_performance, 
-                                         formula   = formula_ind_experiment_phase) %>% 
+                                         formula   = formula_xin) %>% 
   
   group_by(subject, strategy, experiment, phase) %>% 
   summarise(percent  = median(percent),
